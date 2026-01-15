@@ -71,8 +71,9 @@ public class GlobalExceptionHandler {
         if (ex.getBindingResult().hasFieldErrors()) {
             var fieldError = ex.getBindingResult().getFieldError();
             if (fieldError != null) {
+                String fieldName = fieldError.getField();
                 String defaultMessage = fieldError.getDefaultMessage();
-                errorMessage = defaultMessage;
+                errorMessage = String.format("Campo '%s': %s", fieldName, defaultMessage);
             }
         }
         

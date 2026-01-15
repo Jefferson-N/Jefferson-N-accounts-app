@@ -228,8 +228,12 @@ public class PdfReportStrategy implements ReportGenerationStrategy {
         
         float colWidth = width / 4;
         float rowHeight = 12;
+        float textYOffset = -8;
         
-        yPosition -= 15;
+        // Espaciador antes de la tabla
+        yPosition -= 10;
+        
+        //Encabezado
         contentStream.setNonStrokingColor(YELLOW_HEADER);
         contentStream.addRect(margin, yPosition - rowHeight, width, rowHeight);
         contentStream.fill();
@@ -245,14 +249,12 @@ public class PdfReportStrategy implements ReportGenerationStrategy {
         contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 9);
         
         String[] headers = {"Fecha", "Tipo", "Monto", "Saldo"};
-        float xPos = margin + 5;
-        contentStream.beginText();
-        for (String header : headers) {
-            contentStream.newLineAtOffset(xPos, yPosition - 10);
-            contentStream.showText(header);
-            xPos += colWidth;
+        for (int i = 0; i < headers.length; i++) {
+            contentStream.beginText();
+            contentStream.newLineAtOffset(margin + 5 + (i * colWidth), yPosition + textYOffset);
+            contentStream.showText(headers[i]);
+            contentStream.endText();
         }
-        contentStream.endText();
         
         yPosition -= rowHeight;
         
@@ -268,26 +270,24 @@ public class PdfReportStrategy implements ReportGenerationStrategy {
             contentStream.stroke();
             
             // Datos de la transacción
-            xPos = margin + 5;
             String[] data = {
-                String.valueOf(txn.getDate()),
-                String.valueOf(txn.getTransactionType()),
-                String.valueOf(txn.getAmount()),
-                String.valueOf(txn.getBalance())
+                txn.getDate() != null ? txn.getDate().toString() : "",
+                txn.getTransactionType() != null ? txn.getTransactionType() : "",
+                txn.getAmount() != null ? txn.getAmount().toString() : "",
+                txn.getBalance() != null ? txn.getBalance().toString() : ""
             };
             
-            contentStream.beginText();
-            for (String value : data) {
-                contentStream.newLineAtOffset(xPos, yPosition - 9);
-                contentStream.showText(truncateText(value, 12));
-                xPos += colWidth;
+            for (int i = 0; i < data.length; i++) {
+                contentStream.beginText();
+                contentStream.newLineAtOffset(margin + 5 + (i * colWidth), yPosition + textYOffset);
+                contentStream.showText(truncateText(data[i], 12));
+                contentStream.endText();
             }
-            contentStream.endText();
             
             yPosition -= rowHeight;
         }
         
-        yPosition -= 10;  
+        yPosition -= 5;  
         return yPosition;
     }
     

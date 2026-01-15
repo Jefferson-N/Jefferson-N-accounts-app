@@ -4,16 +4,46 @@
   </div>
   <div class="toolbar">
     <div class="toolbar__search">
-      <select 
-        [(ngModel)]="selectedAccountId"
-        (change)="onSearch()"
-        class="toolbar__input"
-      >
-        <option value="">Todas las cuentas</option>
-        <option *ngFor="let account of allAccounts" [value]="account.id!">
-          {{ account.accountNumber }} - {{ account.accountType }}
-        </option>
-      </select>
+      <div class="account-filter">
+        <div class="account-filter__header" (click)="onAccountFilterToggle()">
+          <input 
+            type="text" 
+            [(ngModel)]="accountSearchTerm"
+            (input)="filterAccounts()"
+            placeholder="Buscar cuenta..."
+            class="toolbar__input"
+            readonly="readonly"
+          />
+          <button type="button" class="account-filter__toggle" title="Abrir filtro">
+            <i [class]="accountFilterOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+          </button>
+        </div>
+        <div *ngIf="accountFilterOpen" class="account-filter__dropdown">
+          <div class="account-filter__search">
+            <input 
+              type="text" 
+              [(ngModel)]="accountSearchTerm"
+              (input)="filterAccounts()"
+              placeholder="Filtrar cuentas..."
+              class="account-filter__input"
+              autofocus
+            />
+          </div>
+          <div class="account-filter__list">
+            <div class="account-filter__item" (click)="onAccountSelected('')">
+              <span>Todas las cuentas</span>
+            </div>
+            <div 
+              *ngFor="let account of filteredAccounts" 
+              class="account-filter__item"
+              [class.account-filter__item--selected]="selectedAccountId === account.id"
+              (click)="onAccountSelected(account.id!)"
+            >
+              <span>{{ account.accountNumber }} - {{ account.accountType }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <button class="btn btn--primary" (click)="onNewMovement()">
       Nuevo

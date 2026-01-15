@@ -8,12 +8,42 @@
     <div class="form-grid">
       <div class="form-group">
         <label>Cliente <span class="form-required">*</span></label>
-        <select [(ngModel)]="selectedClientId" (change)="onClientSelect()" class="form-input" required>
-          <option value="">Seleccionar Cliente</option>
-          <option *ngFor="let client of clients" [value]="client.id!">
-            {{ client.name }} - {{ client.identification }}
-          </option>
-        </select>
+        <div class="client-filter">
+          <div class="client-filter__header" (click)="onClientFilterToggle()">
+            <input 
+              type="text" 
+              [value]="getSelectedClientName()"
+              placeholder="Seleccionar Cliente..."
+              class="form-input"
+              readonly="readonly"
+            />
+            <button type="button" class="client-filter__toggle" title="Abrir filtro">
+              <i [class]="clientFilterOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+            </button>
+          </div>
+          <div *ngIf="clientFilterOpen" class="client-filter__dropdown">
+            <div class="client-filter__search">
+              <input 
+                type="text" 
+                [(ngModel)]="clientSearchTerm"
+                (input)="filterClients()"
+                placeholder="Filtrar clientes..."
+                class="client-filter__input"
+                autofocus
+              />
+            </div>
+            <div class="client-filter__list">
+              <div 
+                *ngFor="let client of filteredClients" 
+                class="client-filter__item"
+                [class.client-filter__item--selected]="selectedClientId === client.id"
+                (click)="onClientSelected(client.id!)"
+              >
+                <span>{{ client.name }} ({{ client.identification }})</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <label>Tipo de Reporte <span class="form-required">*</span></label>
@@ -64,49 +94,70 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-item__label">Nombre:</span>
-            <span class="info-item__value">{{ reportData.cliente.nombre }}</span>
+            <span class="info-item__value">{{ reportData.customer?.name }}</span>
           </div>
           <div class="info-item">
-            <span class="info-item__label">Identificación:</span>
-            <span class="info-item__value">{{ reportData.cliente.identificacion }}</span>
+            <span class="info-item__label">Período:</span>
+            <span class="info-item__value">{{ reportData.range?.from }} al {{ reportData.range?.to }}</span>
           </div>
         </div>
       </div>
 
       <div class="report-section">
         <h4 class="report-section__title">Resumen de Cuentas</h4>
-        <div class="accounts-summary">
+        <div class="accounts-summary" *ngIf="reportData.accounts && reportData.accounts.length > 0">
           <table class="data-table">
             <thead class="data-table__head">
               <tr class="data-table__head-row">
                 <th class="data-table__header">Número de Cuenta</th>
                 <th class="data-table__header">Tipo</th>
                 <th class="data-table__header">Saldo Inicial</th>
-                <th class="data-table__header">Saldo Actual</th>
+                <th class="data-table__header">Total Créditos</th>
+                <th class="data-table__header">Total Débitos</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="data-table__body-row" *ngFor="let cuenta of reportData.cuentas">
-                <td class="data-table__cell">{{ cuenta.numeroCuenta }}</td>
-                <td class="data-table__cell">{{ cuenta.tipoCuenta }}</td>
-                <td class="data-table__cell">{{ cuenta.saldoInicial | currency }}</td>
-                <td class="data-table__cell">{{ cuenta.saldoDisponible | currency }}</td>
+              <tr class="data-table__body-row" *ngFor="let account of reportData.accounts">
+                <td class="data-table__cell">{{ account.accountNumber }}</td>
+                <td class="data-table__cell">{{ account.accountType }}</td>
+                <td class="data-table__cell">{{ account.initialBalance | currency }}</td>
+                <td class="data-table__cell">{{ account.totals?.credits | currency }}</td>
+                <td class="data-table__cell">{{ account.totals?.debits | currency }}</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <div *ngIf="!reportData.accounts || reportData.accounts.length === 0" class="info-message">
+          <p><i class="fas fa-info-circle"></i> No hay cuentas registradas para este cliente en el período seleccionado.</p>
+        </div>
       </div>
 
-      <div class="report-section">
-        <h4 class="report-section__title">Totales de Movimientos</h4>
-        <div class="totals-grid">
-          <div class="total-item">
-            <span class="total-item__label">Total Débitos:</span>
-            <span class="total-item__value">{{ reportData.totalDebitos | currency }}</span>
+      <div class="report-section" *ngIf="reportData.accounts && reportData.accounts.length > 0">
+        <h4 class="report-section__title">Detalle de Movimientos por Cuenta</h4>
+        <div class="accounts-detail" *ngFor="let account of reportData.accounts">
+          <div class="account-detail-header">
+            <h5 class="account-detail-title">Cuenta {{ account.accountNumber }} - {{ account.accountType }}</h5>
           </div>
-          <div class="total-item">
-            <span class="total-item__label">Total Créditos:</span>
-            <span class="total-item__value">{{ reportData.totalCreditos | currency }}</span>
+          <table class="data-table" *ngIf="account.transactions && account.transactions.length > 0">
+            <thead class="data-table__head">
+              <tr class="data-table__head-row">
+                <th class="data-table__header">Fecha</th>
+                <th class="data-table__header">Tipo</th>
+                <th class="data-table__header">Monto</th>
+                <th class="data-table__header">Saldo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="data-table__body-row" *ngFor="let txn of account.transactions">
+                <td class="data-table__cell">{{ txn.date }}</td>
+                <td class="data-table__cell">{{ txn.transactionType }}</td>
+                <td class="data-table__cell">{{ txn.amount | currency }}</td>
+                <td class="data-table__cell">{{ txn.balance | currency }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="!account.transactions || account.transactions.length === 0" class="info-message">
+            <p><i class="fas fa-info-circle"></i> No hay movimientos en este período.</p>
           </div>
         </div>
       </div>

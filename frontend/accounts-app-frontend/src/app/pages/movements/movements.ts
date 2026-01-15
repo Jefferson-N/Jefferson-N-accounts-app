@@ -20,8 +20,11 @@ export class Movements implements OnInit {
   movements$!: Observable<Movimiento[]>;
   accounts$!: Observable<Cuenta[]>;
   allAccounts: Cuenta[] = [];
+  filteredAccounts: Cuenta[] = [];
   selectedAccountId = '';
   searchTerm = '';
+  accountFilterOpen = false;
+  accountSearchTerm = '';
   pagination$ = new BehaviorSubject<{ currentPage: number; pageSize: number; totalPages: number; totalRecords: number }>({
     currentPage: 1,
     pageSize: 10,
@@ -115,6 +118,32 @@ export class Movements implements OnInit {
   onSearch(): void {
     this.pagination$.next({ ...this.pagination$.value, currentPage: 1 });
     this.loadMovements();
+  }
+
+  onAccountFilterToggle(): void {
+    this.accountFilterOpen = !this.accountFilterOpen;
+    if (this.accountFilterOpen) {
+      this.filterAccounts();
+    }
+  }
+
+  filterAccounts(): void {
+    if (!this.accountSearchTerm.trim()) {
+      this.filteredAccounts = [...this.allAccounts];
+    } else {
+      const term = this.accountSearchTerm.toLowerCase();
+      this.filteredAccounts = this.allAccounts.filter(account =>
+        account.accountNumber.toLowerCase().includes(term) ||
+        account.accountType.toLowerCase().includes(term)
+      );
+    }
+  }
+
+  onAccountSelected(accountId: string): void {
+    this.selectedAccountId = accountId;
+    this.accountFilterOpen = false;
+    this.accountSearchTerm = '';
+    this.onSearch();
   }
 
   onNewMovement(): void {

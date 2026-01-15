@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -14,8 +14,9 @@ export class Report {
   generarReporte(clienteId: string, fechaInicio: string, fechaFin: string): Observable<any> {
     const params = new HttpParams()
       .set('clienteId', clienteId)
-      .set('fechaInicio', fechaInicio)
-      .set('fechaFin', fechaFin);
+      .set('from', fechaInicio)
+      .set('to', fechaFin)
+      .set('format', 'json');
 
     return this.http.get<any>(`${this.apiUrl}`, { params });
   }
@@ -23,22 +24,34 @@ export class Report {
   generarJSON(clienteId: string, fechaInicio: string, fechaFin: string): Observable<any> {
     const params = new HttpParams()
       .set('clienteId', clienteId)
-      .set('fechaInicio', fechaInicio)
-      .set('fechaFin', fechaFin);
+      .set('from', fechaInicio)
+      .set('to', fechaFin)
+      .set('format', 'json');
 
-    return this.http.get<any>(`${this.apiUrl}/json`, { params });
+    return this.http.get<any>(`${this.apiUrl}`, { params });
   }
 
   generarPDF(clienteId: string, fechaInicio: string, fechaFin: string): Observable<Blob> {
     const params = new HttpParams()
       .set('clienteId', clienteId)
-      .set('fechaInicio', fechaInicio)
-      .set('fechaFin', fechaFin);
+      .set('from', fechaInicio)
+      .set('to', fechaFin)
+      .set('format', 'pdf');
 
-    return this.http.get(`${this.apiUrl}/pdf`, { 
-      params, 
-      responseType: 'blob' 
-    });
+    return this.http.get<any>(`${this.apiUrl}`, { params }).pipe(
+      map((response: any) => {
+        // El servidor devuelve {"base64": "..."}, necesitamos decodificar
+        if (response.base64) {
+          const binaryString = atob(response.base64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          return new Blob([bytes], { type: 'application/pdf' });
+        }
+        return response;
+      })
+    );
   }
 
   descargarPDF(clienteId: string, fechaInicio: string, fechaFin: string): Observable<Blob> {

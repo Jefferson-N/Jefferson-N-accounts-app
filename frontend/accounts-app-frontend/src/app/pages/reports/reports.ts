@@ -16,7 +16,10 @@ import { Cliente } from '../../services/models';
 })
 export class Reports implements OnInit {
   clients: Cliente[] = [];
+  filteredClients: Cliente[] = [];
   selectedClientId: string = '';
+  clientFilterOpen = false;
+  clientSearchTerm = '';
   dateFrom: string = '';
   dateTo: string = '';
   reportFormat: 'json' | 'pdf' = 'json';
@@ -40,9 +43,10 @@ export class Reports implements OnInit {
   }
 
   loadClients(): void {
-    this.clientService.listar(0, 1000, '').subscribe({
+    this.clientService.listar(0, 200, '').subscribe({
       next: (response: any) => {
         this.clients = response.content || [];
+        this.filteredClients = this.clients;
         this.cdr.markForCheck();
       },
       error: (err: any) => {
@@ -50,6 +54,40 @@ export class Reports implements OnInit {
         this.notificationService.error('Error al cargar clientes');
       }
     });
+  }
+
+  onClientFilterToggle(): void {
+    this.clientFilterOpen = !this.clientFilterOpen;
+    if (this.clientFilterOpen) {
+      this.filterClients();
+    }
+  }
+
+  filterClients(): void {
+    if (!this.clientSearchTerm.trim()) {
+      this.filteredClients = [...this.clients];
+    } else {
+      const term = this.clientSearchTerm.toLowerCase();
+      this.filteredClients = this.clients.filter(client =>
+        client.name.toLowerCase().includes(term) ||
+        client.identification.toLowerCase().includes(term)
+      );
+    }
+  }
+
+  onClientSelected(clientId: string): void {
+    this.selectedClientId = clientId;
+    this.clientFilterOpen = false;
+    this.clientSearchTerm = '';
+    this.cdr.markForCheck();
+  }
+
+  getSelectedClientName(): string {
+    if (!this.selectedClientId) {
+      return 'Seleccionar Cliente';
+    }
+    const client = this.clients.find(c => c.id === this.selectedClientId);
+    return client ? client.name : 'Seleccionar Cliente';
   }
 
   onClientSelect(): void {

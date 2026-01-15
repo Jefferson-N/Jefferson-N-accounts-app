@@ -83,12 +83,42 @@
         </div>
         <div class="form-group">
           <label>Cliente <span class="form-required">*</span></label>
-          <select [(ngModel)]="formData.customerId" class="form-input" required>
-            <option value="">Seleccionar Cliente</option>
-            <option *ngFor="let client of clients$ | async" [value]="client.id!">
-              {{ client.name }}
-            </option>
-          </select>
+          <div class="client-filter">
+            <div class="client-filter__header" (click)="onClientFilterToggle()">
+              <input 
+                type="text" 
+                [value]="getSelectedClientName()"
+                placeholder="Seleccionar Cliente..."
+                class="form-input"
+                readonly="readonly"
+              />
+              <button type="button" class="client-filter__toggle" title="Abrir filtro">
+                <i [class]="clientFilterOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+              </button>
+            </div>
+            <div *ngIf="clientFilterOpen" class="client-filter__dropdown">
+              <div class="client-filter__search">
+                <input 
+                  type="text" 
+                  [(ngModel)]="clientSearchTerm"
+                  (input)="filterClients()"
+                  placeholder="Filtrar clientes..."
+                  class="client-filter__input"
+                  autofocus
+                />
+              </div>
+              <div class="client-filter__list">
+                <div 
+                  *ngFor="let client of filteredClients" 
+                  class="client-filter__item"
+                  [class.client-filter__item--selected]="formData.customerId === client.id"
+                  (click)="onClientSelected(client.id!)"
+                >
+                  <span>{{ client.name }} ({{ client.identification }})</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label>

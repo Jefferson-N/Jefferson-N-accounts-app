@@ -20,6 +20,10 @@ export class Accounts implements OnInit {
   searchTerm = '';
   accounts$!: Observable<Cuenta[]>;
   clients$!: Observable<Cliente[]>;
+  allClients: Cliente[] = [];
+  filteredClients: Cliente[] = [];
+  clientFilterOpen = false;
+  clientSearchTerm = '';
   pagination$ = new BehaviorSubject<{ currentPage: number; pageSize: number; totalPages: number; totalRecords: number }>({
     currentPage: 1,
     pageSize: 10,
@@ -68,14 +72,25 @@ export class Accounts implements OnInit {
   }
 
   loadClients(): void {
-    this.clients$ = this.clientService.listar(0, 100, '').pipe(
+    this.clientService.listar(0, 100, '').pipe(
       switchMap((response: any) => 
         new Promise<Cliente[]>(resolve => {
-          resolve(response.content || []);
+          this.allClients = response.content || [];
+          this.filteredClients = this.allClients;
+          resolve(this.allClients);
         })
       ),
       shareReplay(1)
-    );
+    ).subscribe({
+      next: (clients) => {
+        this.clients$ = new Promise(resolve => resolve(clients)) as any;
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        console.error('Error loading clients:', err);
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   loadAccounts(): void {
@@ -113,6 +128,40 @@ export class Accounts implements OnInit {
   onSearch(): void {
     this.pagination$.next({ ...this.pagination$.value, currentPage: 1 });
     this.loadAccounts();
+  }
+
+  onClientFilterToggle(): void {
+    this.clientFilterOpen = !this.clientFilterOpen;
+    if (this.clientFilterOpen) {
+      this.filterClients();
+    }
+  }
+
+  filterClients(): void {
+    if (!this.clientSearchTerm.trim()) {
+      this.filteredClients = [...this.allClients];
+    } else {
+      const term = this.clientSearchTerm.toLowerCase();
+      this.filteredClients = this.allClients.filter(client =>
+        client.name.toLowerCase().includes(term) ||
+        client.identification.toLowerCase().includes(term)
+      );
+    }
+  }
+
+  onClientSelected(clientId: string): void {
+    this.formData.customerId = clientId;
+    this.clientFilterOpen = false;
+    this.clientSearchTerm = '';
+    this.cdr.markForCheck();
+  }
+
+  getSelectedClientName(): string {
+    if (!this.formData.customerId) {
+      return 'Seleccionar Cliente';
+    }
+    const client = this.allClients.find(c => c.id === this.formData.customerId);
+    return client ? client.name : 'Seleccionar Cliente';
   }
 
   onNewAccount(): void {

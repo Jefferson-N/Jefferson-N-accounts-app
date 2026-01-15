@@ -6,8 +6,10 @@ import com.core.bank.application.mapper.CustomerMapper;
 import com.core.bank.domain.entity.Customer;
 import com.core.bank.domain.repository.CustomerRepository;
 import com.core.bank.domain.repository.CustomerRepositoryCustom;
+import com.core.bank.domain.repository.AccountRepository;
 import com.core.bank.infrastructure.exception.ResourceNotFoundException;
 import com.core.bank.infrastructure.exception.ResourceAlreadyExistsException;
+import com.core.bank.infrastructure.exception.BusinessRuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -25,14 +27,17 @@ public class CustomerService {
     @Qualifier("CustomerRepositoryImpl")
     private final CustomerRepositoryCustom customerRepositoryCustom;
     private final CustomerValidationService validationService;
+    private final AccountRepository accountRepository;
 
     public CustomerService(CustomerRepository customerRepository,
                            @Qualifier("CustomerRepositoryImpl") CustomerRepositoryCustom customerRepositoryCustom,
                            CustomerValidationService validationService,
-                           CustomerMapper customerMapper) {
+                           CustomerMapper customerMapper,
+                           AccountRepository accountRepository) {
         this.customerRepository = customerRepository;
         this.customerRepositoryCustom = customerRepositoryCustom;
         this.validationService = validationService;
+        this.accountRepository = accountRepository;
     }
 
     public Customer create(Customer customer) {
@@ -84,6 +89,12 @@ public class CustomerService {
 
     public void delete(String id) {
         Customer customer = getById(id);
+        
+        long accountCount = accountRepository.countByCustomerId(id);
+        if (accountCount > 0) {
+            throw new BusinessRuleException("No se puede eliminar el cliente porque tiene " + accountCount + " cuenta(s) asociada(s)");
+        }
+        
         customerRepository.delete(customer);
     }
 

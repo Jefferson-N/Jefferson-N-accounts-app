@@ -25,8 +25,11 @@ public class Transaction {
     @Column(columnDefinition = "VARCHAR(36)")
     private String id;
 
-    @Column(name = "fecha", nullable = false)
+    @Column(name = "date", nullable = false)
     private LocalDateTime date;
+
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(name = "transaction_type", nullable = false)
     private String type;

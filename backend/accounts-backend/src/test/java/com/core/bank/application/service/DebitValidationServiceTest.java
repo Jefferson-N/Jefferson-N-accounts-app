@@ -86,6 +86,10 @@ class DebitValidationServiceTest {
         account.setCurrentBalance(new BigDecimal("500.00"));
         BigDecimal debitAmount = new BigDecimal("600.00");
 
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class,
+                () -> debitValidationService.validate(account, debitAmount));
+
+        assertEquals("Saldo no disponible", exception.getMessage());
     }
 
     @Test

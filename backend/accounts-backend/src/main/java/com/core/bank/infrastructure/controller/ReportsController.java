@@ -18,11 +18,8 @@ public class ReportsController implements ReportesApi {
 
     @Override
     public ResponseEntity<GetReporte200Response> getReporte(UUID clienteId, LocalDate from, LocalDate to, String format) {
-        try {
-            GetReporte200Response report = reportService.generateReport(clienteId, from, to, format);
-            return ResponseEntity.ok(report);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        GetReporte200Response report = reportService.generateReport(clienteId, from, to, format);
+        return ResponseEntity.ok(report);
+
     }
 }

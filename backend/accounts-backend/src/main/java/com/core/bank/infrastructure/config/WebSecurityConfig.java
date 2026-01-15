@@ -24,8 +24,12 @@ public class WebSecurityConfig {
     http
       .cors(cors -> cors.configurationSource(corsConfigurationSource))
       .csrf(AbstractHttpConfigurer::disable)
-      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
+      .sessionManagement(
+              session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .authorizeHttpRequests(authz -> authz
+              .requestMatchers( "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**" )
+              .permitAll()
+              .anyRequest().permitAll());
 
     return http.build();
   }

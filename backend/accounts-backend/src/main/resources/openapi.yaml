@@ -130,7 +130,7 @@ paths:
         - $ref: '#/components/parameters/ClienteIdParam'
       responses:
         '204':
-          description: Cliente eliminado
+          description: Cliente eliminado correctamente
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -229,7 +229,7 @@ paths:
         - $ref: '#/components/parameters/CuentaIdParam'
       responses:
         '204':
-          description: Cuenta eliminada
+          description: Cuenta eliminada correctamente
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -459,20 +459,36 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          description: Nombre del cliente
         gender:
           type: string
+          enum: [Masculino, Femenino, Otro]
+          description: Género del cliente
         age:
           type: integer
+          minimum: 18
+          maximum: 150
+          description: Edad del cliente
         identification:
           type: string
+          pattern: '^\d{10}$'
+          description: Cédula de identidad (10 dígitos)
         address:
           type: string
+          minLength: 1
+          description: Dirección del cliente
         phone:
           type: string
+          minLength: 1
+          description: Teléfono del cliente
         password:
           type: string
+          pattern: '^\d{4}$'
+          description: Clave de tarjeta (4 dígitos)
         status:
           type: boolean
+          description: Estado del cliente
 
     CustomerUpdate:
       type: object
@@ -541,21 +557,24 @@ components:
 
     AccountCreate:
       type: object
-      required: [accountNumber, accountType, initialBalance, status, customerId]
+      required: [accountType, initialBalance, status, customerId]
       properties:
-        accountNumber:
-          type: string
         accountType:
           type: string
           enum: [AHORRO, CORRIENTE]
+          description: Tipo de cuenta
         initialBalance:
           type: number
           format: double
+          minimum: 0
+          description: Saldo inicial
         status:
           type: boolean
+          description: Estado de la cuenta
         customerId:
           type: string
           format: uuid
+          description: ID del cliente propietario
 
     AccountPatch:
       type: object
@@ -576,6 +595,9 @@ components:
         date:
           type: string
           format: date-time
+        description:
+          type: string
+          description: Descripción del movimiento
         transactionType:
           type: string
           enum: [CREDITO, DEBITO]
@@ -591,17 +613,27 @@ components:
 
     TransactionCreate:
       type: object
-      required: [accountId, transactionType, amount]
+      required: [accountId, transactionType, amount, description]
       properties:
         accountId:
           type: string
           format: uuid
+          description: ID de la cuenta
         transactionType:
           type: string
           enum: [CREDITO, DEBITO]
+          description: Tipo de transacción
         amount:
           type: number
           format: double
+          minimum: 0
+          exclusiveMinimum: true
+          description: Monto de la transacción
+        description:
+          type: string
+          minLength: 3
+          maxLength: 255
+          description: Descripción del movimiento
 
     ReportJson:
       type: object

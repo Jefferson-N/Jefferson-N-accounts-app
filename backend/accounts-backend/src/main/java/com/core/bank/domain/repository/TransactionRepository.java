@@ -17,4 +17,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
            "AND CAST(t.date AS DATE) = CAST(:date AS DATE)")
     BigDecimal sumDebitsForDay(@Param("accountId") String accountId,
                               @Param("date") LocalDateTime date);
+
+    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.account.id = :accountId")
+    long countByAccountId(@Param("accountId") String accountId);
 }

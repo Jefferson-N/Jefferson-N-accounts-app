@@ -1,5 +1,6 @@
 package com.core.bank.application.service;
 
+import com.core.bank.infrastructure.exception.BusinessRuleException;
 import com.core.bank.application.strategy.reports.JsonReportStrategy;
 import com.core.bank.application.strategy.reports.PdfReportStrategy;
 import com.core.bank.application.strategy.reports.ReportGenerationStrategy;
@@ -29,7 +30,7 @@ public class ReportService {
         } else if ("pdf".equalsIgnoreCase(format)) {
             return pdfReportStrategy;
         } else {
-            throw new IllegalArgumentException("Formato de reporte no válido. Use 'json' o 'pdf'");
+            throw new BusinessRuleException("Formato de reporte no válido. Use 'json' o 'pdf'");
         }
     }
 }

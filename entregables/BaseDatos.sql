@@ -1,4 +1,5 @@
 
+DROP DATABASE IF EXISTS accounts_db;
 CREATE DATABASE IF NOT EXISTS accounts_db;
 USE accounts_db;
 
@@ -36,7 +37,8 @@ CREATE TABLE cuentas (
 
 CREATE TABLE movimientos (
     id VARCHAR(36) PRIMARY KEY,
-    fecha TIMESTAMP NOT NULL,
+    date TIMESTAMP NOT NULL,
+    description VARCHAR(255) NOT NULL,
     transaction_type VARCHAR(20) NOT NULL,
     amount DECIMAL(19, 2) NOT NULL,
     balance DECIMAL(19, 2) NOT NULL,
@@ -44,13 +46,13 @@ CREATE TABLE movimientos (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cuenta_id) REFERENCES cuentas(id) ON DELETE CASCADE,
     INDEX idx_cuenta_id (cuenta_id),
-    INDEX idx_fecha (fecha)
+    INDEX idx_fecha ( date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE INDEX idx_personas_name ON personas(name);
 CREATE INDEX idx_personas_status ON personas(status);
 CREATE INDEX idx_cuentas_status ON cuentas(status);
-CREATE INDEX idx_movimientos_cuenta_fecha ON movimientos(cuenta_id, fecha);
+CREATE INDEX idx_movimientos_cuenta_fecha ON movimientos(cuenta_id, date);
 
 -- INSERT INTO personas (id, tipo_persona, name, gender, age, identification, address, phone, password, status)
 -- VALUES
@@ -76,12 +78,12 @@ CREATE INDEX idx_movimientos_cuenta_fecha ON movimientos(cuenta_id, fecha);
 -- ('acc3', '452578', 'CORRIENTE', 2000.00, 2000.00, TRUE, 'c3');
 
 -- -- Insertar movimientos de ejemplo
--- INSERT INTO movimientos (id, fecha, transaction_type, amount, balance, cuenta_id)
+-- INSERT INTO movimientos (id, date, description, transaction_type, amount, balance, cuenta_id)
 -- VALUES
--- ('mov1', '2022-02-08 10:00:00', 'DEBITO', 575.00, 1425.00, 'acc1'),
--- ('mov2', '2022-02-10 11:00:00', 'CREDITO', 600.00, 1600.00, 'acc2'),
--- ('mov3', '2022-02-12 12:00:00', 'CREDITO', 150.00, 2150.00, 'acc3'),
--- ('mov4', '2022-02-08 09:00:00', 'DEBITO', 540.00, 0.00, 'acc4');
+-- ('mov1', '2022-02-08 10:00:00', 'Retiro de 575', 'DEBITO', 575.00, 1425.00, 'acc1'),
+-- ('mov2', '2022-02-10 11:00:00', 'Depósito de 600', 'CREDITO', 600.00, 1600.00, 'acc2'),
+-- ('mov3', '2022-02-12 12:00:00', 'Depósito de 150', 'CREDITO', 150.00, 2150.00, 'acc3'),
+-- ('mov4', '2022-02-08 09:00:00', 'Retiro de 540', 'DEBITO', 540.00, 0.00, 'acc4'),
 
 
 

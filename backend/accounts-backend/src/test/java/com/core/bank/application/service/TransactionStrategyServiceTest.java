@@ -2,6 +2,7 @@ package com.core.bank.application.service;
 
 import com.core.bank.domain.entity.Account;
 import com.core.bank.domain.entity.Customer;
+import com.core.bank.infrastructure.exception.BusinessRuleException;
 import com.core.bank.model.dto.TransactionDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

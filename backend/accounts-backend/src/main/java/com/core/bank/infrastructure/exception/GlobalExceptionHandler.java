@@ -68,12 +68,12 @@ public class GlobalExceptionHandler {
         
         String errorMessage = "Datos inválidos. Verifique los campos del formulario.";
         
-        if (ex.getBindingResult().hasErrors()) {
-            errorMessage = ex.getBindingResult().getFieldError() != null
-                    ? String.format("Campo '%s': %s", 
-                        ex.getBindingResult().getFieldError().getField(),
-                        ex.getBindingResult().getFieldError().getDefaultMessage())
-                    : errorMessage;
+        if (ex.getBindingResult().hasFieldErrors()) {
+            var fieldError = ex.getBindingResult().getFieldError();
+            if (fieldError != null) {
+                String defaultMessage = fieldError.getDefaultMessage();
+                errorMessage = defaultMessage;
+            }
         }
         
         ErrorResponse errorResponse = new ErrorResponse()

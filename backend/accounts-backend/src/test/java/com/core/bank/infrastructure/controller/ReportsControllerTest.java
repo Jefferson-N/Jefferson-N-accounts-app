@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ class ReportsControllerTest {
     private ReportService reportService;
 
     @Test
+    @WithMockUser(username = "test", roles = {"USER"})
     void testGetReportJsonFormat() throws Exception {
         UUID clienteId = UUID.randomUUID();
         LocalDate from = LocalDate.of(2022, 2, 1);
@@ -80,6 +82,8 @@ class ReportsControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test", roles = {"USER"})
+    @WithMockUser(username = "test", roles = {"USER"})
     void testGetReportPdfFormat() throws Exception {
         UUID clienteId = UUID.randomUUID();
         LocalDate from = LocalDate.of(2022, 2, 1);

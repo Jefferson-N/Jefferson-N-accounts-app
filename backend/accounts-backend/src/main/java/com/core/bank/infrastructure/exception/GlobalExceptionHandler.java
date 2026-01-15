@@ -1,17 +1,15 @@
 package com.core.bank.infrastructure.exception;
 
+import com.core.bank.model.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.OffsetDateTime;
 
 
 @Slf4j
@@ -25,11 +23,10 @@ public class GlobalExceptionHandler {
         
         log.warn("Resource not found: {}", ex.getMessage());
         
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        ErrorResponse errorResponse = new ErrorResponse()
                 .code(HttpStatus.NOT_FOUND.value())
                 .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
+                .timestamp(OffsetDateTime.now());
         
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
@@ -41,11 +38,10 @@ public class GlobalExceptionHandler {
         
         log.warn("Resource already exists: {}", ex.getMessage());
         
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        ErrorResponse errorResponse = new ErrorResponse()
                 .code(HttpStatus.CONFLICT.value())
                 .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
+                .timestamp(OffsetDateTime.now());
         
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
@@ -56,32 +52,34 @@ public class GlobalExceptionHandler {
         
         log.warn("Business rule violation: {}", ex.getMessage());
         
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .code(HttpStatus.BAD_REQUEST.value())
+        ErrorResponse errorResponse = new ErrorResponse()
+                .code(HttpStatus.CONFLICT.value())
                 .message(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
+                .timestamp(OffsetDateTime.now());
         
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
         
-        log.warn("Validation failed");
+        log.warn("Validation failed: {}", ex.getMessage());
         
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error ->
-            errors.put(((FieldError) error).getField(), error.getDefaultMessage())
-        );
+        String errorMessage = "Datos inválidos. Verifique los campos del formulario.";
         
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        if (ex.getBindingResult().hasErrors()) {
+            errorMessage = ex.getBindingResult().getFieldError() != null
+                    ? String.format("Campo '%s': %s", 
+                        ex.getBindingResult().getFieldError().getField(),
+                        ex.getBindingResult().getFieldError().getDefaultMessage())
+                    : errorMessage;
+        }
+        
+        ErrorResponse errorResponse = new ErrorResponse()
                 .code(HttpStatus.BAD_REQUEST.value())
-                .message("Validación fallida")
-                .details(errors.toString())
-                .timestamp(LocalDateTime.now())
-                .build();
+                .message(errorMessage)
+                .timestamp(OffsetDateTime.now());
         
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
@@ -90,14 +88,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex, WebRequest request) {
         
-        log.error("Unhandled exception", ex);
+        log.error("Unhandled exception occurred", ex);
         
-        ErrorResponse errorResponse = ErrorResponse.builder()
+        ErrorResponse errorResponse = new ErrorResponse()
                 .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("Error interno del servidor")
-                .details(ex.getMessage())
-                .timestamp(LocalDateTime.now())
-                .build();
+                .message("Error procesando la solicitud. Por favor contacte con el administrador del sistema.")
+                .timestamp(OffsetDateTime.now());
         
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

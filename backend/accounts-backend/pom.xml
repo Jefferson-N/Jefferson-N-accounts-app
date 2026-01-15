@@ -28,14 +28,13 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
-		<spring.boot.version>3.2.0</spring.boot.version>
 		<springdoc.version>2.5.0</springdoc.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<lombok.version>1.18.30</lombok.version>
-		<junit.jupiter.version>5.10.0</junit.jupiter.version>
 		<mysql.connector.version>9.5.0</mysql.connector.version>
 		<openapi.generator.version>7.2.0</openapi.generator.version>
 		<jackson.databind.nullable.version>0.2.6</jackson.databind.nullable.version>
+		<pdfbox.version>3.0.0</pdfbox.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
@@ -101,10 +100,35 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>${pdfbox.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 
@@ -128,7 +152,7 @@
 							<inputSpec>${project.basedir}/src/main/resources/openapi.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>com.core.bank.api</apiPackage>
-							<modelPackage>com.core.bank.model</modelPackage>
+							<modelPackage>com.core.bank.model.dto</modelPackage>
 							<supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
 							<configOptions>
 								<interfaceOnly>true</interfaceOnly>

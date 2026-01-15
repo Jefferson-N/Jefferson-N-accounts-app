@@ -7,7 +7,7 @@ info:
     name: Jefferson Noroña
 
 servers:
-  - url: http://localhost:8080/api
+  - url: http://localhost:8081
 
 tags:
   - name: Clientes
@@ -16,7 +16,7 @@ tags:
   - name: Reportes
 
 paths:
-  /clientes:
+  /api/clientes:
     get:
       tags: [Clientes]
       summary: Listar clientes
@@ -54,13 +54,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Customer'
+                $ref: '#/components/schemas/CustomerDTO'
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
           $ref: '#/components/responses/Conflict'
 
-  /clientes/{clienteId}:
+  /api/clientes/{clienteId}:
     get:
       tags: [Clientes]
       summary: Obtener cliente
@@ -73,7 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Customer'
+                $ref: '#/components/schemas/CustomerDTO'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -94,7 +94,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Customer'
+                $ref: '#/components/schemas/CustomerDTO'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -117,7 +117,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Customer'
+                $ref: '#/components/schemas/CustomerDTO'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -134,7 +134,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /cuentas:
+  /api/cuentas:
     get:
       tags: [Cuentas]
       summary: Listar cuentas
@@ -176,13 +176,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountDTO'
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
           $ref: '#/components/responses/Conflict'
 
-  /cuentas/{cuentaId}:
+  /api/cuentas/{cuentaId}:
     get:
       tags: [Cuentas]
       summary: Obtener cuenta
@@ -195,7 +195,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountDTO'
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
@@ -216,7 +216,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountDTO'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -233,7 +233,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /movimientos:
+  /api/movimientos:
     get:
       tags: [Movimientos]
       summary: Listar movimientos
@@ -267,7 +267,20 @@ paths:
           $ref: '#/components/responses/BadRequest'
     post:
       tags: [Movimientos]
-      summary: Registrar movimiento
+      summary: Registrar movimiento bancario
+      description: |
+        Registra un movimiento bancario (crédito o débito) aplicando reglas de negocio.
+        
+        REGLAS DE NEGOCIO:
+        1. CREDITO: Incrementa el saldo (valores positivos)
+        2. DEBITO: Decrementa el saldo (valores negativos)
+        3. Límite diario de retiro: $1000 USD ACUMULADO por día
+           - Se suma TODOS los débitos del día (00:00-23:59)
+           - Si acumulado_débitos_día + nuevo_débito > $1000, se rechaza con código 1002
+           - Ejemplo: Retiro $575 + Retiro $426 = $1001 > $1000 (RECHAZADO)
+           - Ejemplo: Retiro $575 + Retiro $425 = $1000 (PERMITIDO)
+        4. Saldo cero: Si saldo = 0, no se permite débito (código 1001)
+        5. Saldo insuficiente: Si saldo < monto, no se permite (código 1001)
       operationId: createMovimiento
       requestBody:
         required: true
@@ -281,7 +294,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Transaction'
+                $ref: '#/components/schemas/TransactionDTO'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -305,7 +318,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /reportes:
+  /api/reportes:
     get:
       tags: [Reportes]
       summary: Generar reporte
@@ -416,7 +429,7 @@ components:
           type: string
           format: date-time
 
-    Customer:
+    CustomerDTO:
       type: object
       required: [id, name, gender, age, identification, address, phone, status]
       properties:
@@ -502,7 +515,7 @@ components:
         status:
           type: boolean
 
-    Account:
+    AccountDTO:
       type: object
       required: [id, accountNumber, accountType, initialBalance, status, customerId]
       properties:
@@ -513,7 +526,7 @@ components:
           type: string
         accountType:
           type: string
-          enum: [Ahorro, Corriente]
+          enum: [AHORRO, CORRIENTE]
         initialBalance:
           type: number
           format: double
@@ -534,7 +547,7 @@ components:
           type: string
         accountType:
           type: string
-          enum: [Ahorro, Corriente]
+          enum: [AHORRO, CORRIENTE]
         initialBalance:
           type: number
           format: double
@@ -549,11 +562,11 @@ components:
       properties:
         accountType:
           type: string
-          enum: [Ahorro, Corriente]
+          enum: [AHORRO, CORRIENTE]
         status:
           type: boolean
 
-    Transaction:
+    TransactionDTO:
       type: object
       required: [id, date, transactionType, amount, balance, accountId]
       properties:
@@ -667,6 +680,7 @@ components:
           type: integer
         totalElements:
           type: integer
+          format: int64
         totalPages:
           type: integer
 
@@ -678,7 +692,7 @@ components:
             content:
               type: array
               items:
-                $ref: '#/components/schemas/Customer'
+                $ref: '#/components/schemas/CustomerDTO'
 
     PageResponseAccount:
       allOf:
@@ -688,7 +702,7 @@ components:
             content:
               type: array
               items:
-                $ref: '#/components/schemas/Account'
+                $ref: '#/components/schemas/AccountDTO'
 
     PageResponseTransaction:
       allOf:
@@ -698,4 +712,4 @@ components:
             content:
               type: array
               items:
-                $ref: '#/components/schemas/Transaction'
+                $ref: '#/components/schemas/TransactionDTO'

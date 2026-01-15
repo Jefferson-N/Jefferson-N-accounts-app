@@ -1,57 +1,124 @@
 <div class="page-container">
   <div class="page-header">
-    <h2 class="page-title">Gestión de Clientes</h2>
+    <h2 class="page-header__title">Clientes</h2>
   </div>
   <div class="toolbar">
-    <div class="search-box">
+    <div class="toolbar__search">
       <input 
         type="text" 
         [(ngModel)]="searchTerm"
         (input)="onSearch()"
         placeholder="Buscar cliente..."
-        class="search-input"
+        class="toolbar__input"
       />
     </div>
-    <button class="btn btn-primary" (click)="onNewCliente()">
+    <button class="btn btn--primary" (click)="onNewClient()">
       Nuevo
     </button>
   </div>
   <div class="table-container">
     <table class="data-table">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Dirección</th>
-          <th>Teléfono</th>
-          <th>Estado</th>
-          <th>Acciones</th>
+      <thead class="data-table__head">
+        <tr class="data-table__head-row">
+          <th class="data-table__header">Nombre</th>
+          <th class="data-table__header">Dirección</th>
+          <th class="data-table__header">Teléfono</th>
+          <th class="data-table__header">Estado</th>
+          <th class="data-table__header">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let cliente of clientes">
-          <td>{{ cliente.nombre }}</td>
-          <td>{{ cliente.direccion }}</td>
-          <td>{{ cliente.telefono }}</td>
-          <td>
-            <span class="badge" [ngClass]="{'badge-active': cliente.estado, 'badge-inactive': !cliente.estado}">
-              {{ cliente.estado ? 'Activo' : 'Inactivo' }}
+        <tr class="data-table__body-row" *ngFor="let client of clients$ | async">
+          <td class="data-table__cell">{{ client.name }}</td>
+          <td class="data-table__cell">{{ client.address }}</td>
+          <td class="data-table__cell">{{ client.phone }}</td>
+          <td class="data-table__cell">
+            <span [ngClass]="{'badge--active': client.status, 'badge--inactive': !client.status}" class="badge">
+              {{ client.status ? 'Activo' : 'Inactivo' }}
             </span>
           </td>
-          <td class="actions">
-            <button class="btn-icon"></button>
-            <button class="btn-icon"></button>
+          <td class="data-table__cell">
+            <div class="actions">
+              <button class="actions__button" (click)="onEditClient(client.id!)" title="Editar"><i class="fas fa-edit"></i></button>
+              <button class="actions__button" (click)="onDeleteClient(client.id!)" title="Eliminar"><i class="fas fa-trash"></i></button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
   <div class="pagination">
-    <button class="btn btn-secondary" (click)="onPreviousPage()" [disabled]="currentPage === 1">
-      Anterior
+    <button class="btn btn--secondary" (click)="onPreviousPage()" [disabled]="currentPage === 1">
+      <i class="fas fa-minus"></i>
     </button>
-    <span class="page-info">Página {{ currentPage }} de {{ totalPages }}</span>
-    <button class="btn btn-secondary" (click)="onNextPage()" [disabled]="currentPage === totalPages">
-      Siguiente
+    <span class="pagination__info">Página {{ currentPage }} de {{ totalPages }}</span>
+    <button class="btn btn--secondary" (click)="onNextPage()" [disabled]="currentPage === totalPages">
+      <i class="fas fa-plus"></i>
     </button>
+  </div>
+
+  <div *ngIf="showModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{ modalMode === 'create' ? 'Nuevo Cliente' : 'Editar Cliente' }}</h3>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nombre <span class="form-required">*</span></label>
+          <input type="text" [(ngModel)]="formData.name" placeholder="Ej: Juan Pérez" class="form-input" required minlength="8" maxlength="30" />
+          <small class="form-hint">Mínimo 8, máximo 30 caracteres</small>
+        </div>
+        <div class="form-group">
+          <label>Género <span class="form-required">*</span></label>
+          <select [(ngModel)]="formData.gender" class="form-input" required>
+            <option value="">Seleccionar</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Edad <span class="form-required">*</span></label>
+          <input type="number" [(ngModel)]="formData.age" placeholder="Ej: 30" class="form-input" required min="18" max="120" />
+          <small class="form-hint">Debe ser mayor de 18 años</small>
+        </div>
+        <div class="form-group">
+          <label>Cédula <span class="form-required">*</span></label>
+          <input type="text" [(ngModel)]="formData.identification" placeholder="Ej: 1234567890" class="form-input" required pattern="[0-9]{10}" />
+          <small class="form-hint">10 dígitos sin caracteres especiales</small>
+        </div>
+        <div class="form-group">
+          <label>Dirección <span class="form-required">*</span></label>
+          <input type="text" [(ngModel)]="formData.address" placeholder="Ej: Calle Principal 123" class="form-input" required minlength="5" maxlength="100" />
+          <small class="form-hint">Mínimo 5 caracteres</small>
+        </div>
+        <div class="form-group">
+          <label>Teléfono <span class="form-required">*</span></label>
+          <input type="text" [(ngModel)]="formData.phone" placeholder="Ej: 0998123456" class="form-input" required pattern="[0-9]{10}" />
+          <small class="form-hint">10 dígitos sin caracteres especiales</small>
+        </div>
+        <div class="form-group">
+          <label>Contraseña <span class="form-required">*</span></label>
+          <div class="password-input-group">
+            <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="formData.password" placeholder="Contraseña" class="form-input" 
+            required minlength="4" 
+            maxlength="4"/>
+            <button type="button" class="password-toggle" (click)="showPassword = !showPassword" title="Ver/Ocultar contraseña">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <small class="form-hint">Mínimo 4 caracteres</small>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="formData.status" />
+            Estado Activo
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn--secondary" (click)="onCloseModal()">Cancelar</button>
+        <button class="btn btn--primary" (click)="onSaveClient()">Guardar</button>
+      </div>
+    </div>
   </div>
 </div>

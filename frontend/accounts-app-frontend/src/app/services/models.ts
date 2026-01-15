@@ -1,142 +1,100 @@
 export interface Persona {
   id?: string;
-  nombre: string;
-  genero: string;
-  edad: number;
-  identificacion: string;
-  direccion: string;
-  telefono: string;
+  name: string;
+  gender: string;
+  age: number;
+  identification: string;
+  address: string;
+  phone: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Cliente extends Persona {
-  clienteId?: string;
-  contrasena: string;
-  estado: boolean;
+  password: string;
+  status: boolean;
 }
 
-export interface CustomerCreate {
-  nombre: string;
-  genero: string;
-  edad: number;
-  identificacion: string;
-  direccion: string;
-  telefono: string;
-  contrasena: string;
-  estado: boolean;
+export interface CustomerRequest {
+  name: string;
+  gender: string;
+  age: number;
+  identification: string;
+  address: string;
+  phone: string;
+  password: string;
+  status: boolean;
 }
 
-export interface CustomerUpdate {
-  nombre?: string;
-  genero?: string;
-  edad?: number;
-  identificacion?: string;
-  direccion?: string;
-  telefono?: string;
-  contrasena?: string;
-  estado?: boolean;
+export interface CustomerUpdateRequest {
+  name?: string;
+  gender?: string;
+  age?: number;
+  identification?: string;
+  address?: string;
+  phone?: string;
+  password?: string;
+  status?: boolean;
 }
 
-export interface CustomerPatch {
-  nombre?: string;
-  genero?: string;
-  edad?: number;
-  identificacion?: string;
-  direccion?: string;
-  telefono?: string;
-  contrasena?: string;
-  estado?: boolean;
-}
-
-export interface CustomerDTO extends Cliente {
-  id: string;
-}
-
-export interface Cuenta {
-  id?: string;
-  numeroCuenta: string;
-  tipoCuenta: 'AHORRO' | 'CORRIENTE';
-  saldoInicial: number;
-  estado: boolean;
-  customerId?: string;
-  cliente?: Cliente;
-}
-
-export interface AccountCreate {
-  numeroCuenta: string;
-  tipoCuenta: 'AHORRO' | 'CORRIENTE';
-  saldoInicial: number;
-  estado: boolean;
-  customerId: string;
-}
-
-export interface AccountPatch {
-  estado?: boolean;
-}
-
-export interface AccountDTO extends Cuenta {
-  id: string;
-  saldoDisponible: number;
-}
-
-export interface Movimiento {
-  id?: string;
-  fecha: Date;
-  tipoMovimiento: 'CREDITO' | 'DEBITO';
-  valor: number;
-  saldo: number;
-  cuentaId?: string;
-  cuenta?: Cuenta;
-}
-
-export interface TransactionCreate {
-  tipoMovimiento: 'CREDITO' | 'DEBITO';
-  valor: number;
-  cuentaId: string;
-}
-
-export interface TransactionDTO extends Movimiento {
-  id: string;
-}
-
-export interface Reporte {
-  cliente: ClienteReporte;
-  cuentas: CuentaReporte[];
-  fechaInicio: Date;
-  fechaFin: Date;
-  totalDebitos: number;
-  totalCreditos: number;
-}
-
-export interface ClienteReporte {
-  id: string;
-  nombre: string;
-  identificacion: string;
-}
-
-export interface CuentaReporte {
-  id: string;
-  numeroCuenta: string;
-  tipoCuenta: string;
-  saldoInicial: number;
-  saldoDisponible: number;
-}
-
-export interface PaginationMetadata {
+export interface PaginatedResponse<T> {
+  content: T[];
   page: number;
   size: number;
   totalElements: number;
   totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
 }
 
-export interface PageResponse<T> {
-  content: T[];
-  metadata: PaginationMetadata;
+export interface Cuenta {
+  id?: string;
+  accountNumber: string;
+  accountType: 'AHORRO' | 'CORRIENTE';
+  initialBalance: number;
+  balance?: number;
+  status: boolean;
+  customerId?: string;
+  customer?: Cliente;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface ApiError {
-  message: string;
-  code?: string;
-  timestamp?: Date;
+export interface AccountRequest {
+  accountNumber: string;
+  accountType: 'AHORRO' | 'CORRIENTE';
+  initialBalance: number;
+  status: boolean;
+  customerId: string;
+}
+
+export interface AccountUpdateRequest {
+  accountNumber?: string;
+  accountType?: 'AHORRO' | 'CORRIENTE';
+  initialBalance?: number;
+  status?: boolean;
+}
+
+export interface Movimiento {
+  id?: string;
+  date: string;
+  type: 'CREDITO' | 'DEBITO';
+  amount: number;
+  balance?: number;
+  accountId?: string;
+  account?: Cuenta;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TransactionRequest {
+  date: string;
+  transactionType: 'CREDITO' | 'DEBITO';
+  amount: number;
+  accountId: string;
+}
+
+export interface TransactionUpdateRequest {
+  date?: string;
+  type?: 'CREDITO' | 'DEBITO';
+  amount?: number;
+  balance?: number;
 }

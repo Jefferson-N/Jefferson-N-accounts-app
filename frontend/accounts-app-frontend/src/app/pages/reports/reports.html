@@ -1,1 +1,115 @@
-<p>reports works!</p>
+<div class="page-container">
+  <div class="page-header">
+    <h2 class="page-header__title">Reportes</h2>
+  </div>
+
+  <div class="report-generator">
+    <h3 class="report-generator__title">Generar Reporte</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Cliente <span class="form-required">*</span></label>
+        <select [(ngModel)]="selectedClientId" (change)="onClientSelect()" class="form-input" required>
+          <option value="">Seleccionar Cliente</option>
+          <option *ngFor="let client of clients" [value]="client.id!">
+            {{ client.name }} - {{ client.identification }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tipo de Reporte <span class="form-required">*</span></label>
+        <select [(ngModel)]="reportFormat" class="form-input" required>
+          <option value="json">JSON (Para análisis)</option>
+          <option value="pdf">PDF (Para imprimir)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Desde <span class="form-required">*</span></label>
+        <input type="date" [(ngModel)]="dateFrom" class="form-input" required />
+      </div>
+      <div class="form-group">
+        <label>Hasta <span class="form-required">*</span></label>
+        <input type="date" [(ngModel)]="dateTo" class="form-input" required />
+      </div>
+    </div>
+    <div class="button-group">
+      <button 
+        class="btn btn--primary" 
+        (click)="onGenerateReport()" 
+        [disabled]="isLoading"
+      >
+        {{ isLoading ? 'Generando...' : 'Generar Reporte' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="reportGenerated && reportData" class="report-result">
+    <div class="report-header">
+      <h3 class="report-header__title">Reporte Generado - {{ getClientName(selectedClientId) }}</h3>
+      <div class="report-header__actions">
+        <button class="btn btn--primary" (click)="onDownload()">
+          <i class="fas fa-download"></i> 
+          Descargar {{ reportFormat === 'json' ? 'JSON' : 'PDF' }}
+        </button>
+        <button class="btn btn--secondary" (click)="clearReport()">
+          <i class="fas fa-times"></i> Limpiar
+        </button>
+      </div>
+    </div>
+
+    <div class="report-content">
+      <div class="report-section">
+        <h4 class="report-section__title">Información del Cliente</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-item__label">Nombre:</span>
+            <span class="info-item__value">{{ reportData.cliente.nombre }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-item__label">Identificación:</span>
+            <span class="info-item__value">{{ reportData.cliente.identificacion }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h4 class="report-section__title">Resumen de Cuentas</h4>
+        <div class="accounts-summary">
+          <table class="data-table">
+            <thead class="data-table__head">
+              <tr class="data-table__head-row">
+                <th class="data-table__header">Número de Cuenta</th>
+                <th class="data-table__header">Tipo</th>
+                <th class="data-table__header">Saldo Inicial</th>
+                <th class="data-table__header">Saldo Actual</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="data-table__body-row" *ngFor="let cuenta of reportData.cuentas">
+                <td class="data-table__cell">{{ cuenta.numeroCuenta }}</td>
+                <td class="data-table__cell">{{ cuenta.tipoCuenta }}</td>
+                <td class="data-table__cell">{{ cuenta.saldoInicial | currency }}</td>
+                <td class="data-table__cell">{{ cuenta.saldoDisponible | currency }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h4 class="report-section__title">Totales de Movimientos</h4>
+        <div class="totals-grid">
+          <div class="total-item">
+            <span class="total-item__label">Total Débitos:</span>
+            <span class="total-item__value">{{ reportData.totalDebitos | currency }}</span>
+          </div>
+          <div class="total-item">
+            <span class="total-item__label">Total Créditos:</span>
+            <span class="total-item__value">{{ reportData.totalCreditos | currency }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

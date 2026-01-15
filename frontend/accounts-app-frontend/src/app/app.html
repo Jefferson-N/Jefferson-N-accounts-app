@@ -6,10 +6,10 @@
     <aside class="app-aside">
       <nav class="app-nav">
         <ul>
-          <li><a href="#/clientes" class="nav-link">Clientes</a></li>
-          <li><a href="#/cuentas" class="nav-link">Cuentas</a></li>
-          <li><a href="#/movimientos" class="nav-link">Movimientos</a></li>
-          <li><a href="#/reportes" class="nav-link">Reportes</a></li>
+          <li><a routerLink="/clients" class="nav-link">Clientes</a></li>
+          <li><a routerLink="/accounts" class="nav-link">Cuentas</a></li>
+          <li><a routerLink="/movements" class="nav-link">Movimientos</a></li>
+          <li><a routerLink="/reports" class="nav-link">Reportes</a></li>
         </ul>
       </nav>
     </aside>
@@ -17,5 +17,5 @@
       <router-outlet></router-outlet>
     </main>
   </div>
+  <app-notification></app-notification>
 </div>
-<router-outlet />

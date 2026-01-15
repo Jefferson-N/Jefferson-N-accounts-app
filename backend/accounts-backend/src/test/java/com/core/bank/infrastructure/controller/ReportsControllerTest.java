@@ -83,7 +83,6 @@ class ReportsControllerTest {
 
     @Test
     @WithMockUser(username = "test", roles = {"USER"})
-    @WithMockUser(username = "test", roles = {"USER"})
     void testGetReportPdfFormat() throws Exception {
         UUID clienteId = UUID.randomUUID();
         LocalDate from = LocalDate.of(2022, 2, 1);

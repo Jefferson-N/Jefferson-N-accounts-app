@@ -53,6 +53,6 @@ class TransactionsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(transactionCreate))
                 .with(csrf()))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isConflict());
     }
 }

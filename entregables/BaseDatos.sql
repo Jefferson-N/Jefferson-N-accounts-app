@@ -54,36 +54,11 @@ CREATE INDEX idx_personas_status ON personas(status);
 CREATE INDEX idx_cuentas_status ON cuentas(status);
 CREATE INDEX idx_movimientos_cuenta_fecha ON movimientos(cuenta_id, date);
 
--- INSERT INTO personas (id, tipo_persona, name, gender, age, identification, address, phone, password, status)
--- VALUES
--- ('c1', 'CLIENTE', 'Jose Lema', 'Masculino', 30, '1234567890', 'Otavalo y su principal', '0985247885', '1234', TRUE),
--- ('c2', 'CLIENTE', 'Marianela Montalvo', 'Femenino', 28, '0987654321', 'Amazonas y NNUU', '0975498565', '5678', TRUE),
--- ('c3', 'CLIENTE', 'Juan Osorio', 'Masculino', 35, '1122334455', '13 junio y Equinoccial', '0987487587', '1245', TRUE);
-
--- -- Insertar cuentas para Jose Lema
--- INSERT INTO cuentas (id, account_number, account_type, initial_balance, current_balance, status, cliente_id)
--- VALUES
--- ('acc1', '478578', 'AHORRO', 2000.00, 2000.00, TRUE, 'c1'),
--- ('acc5', '585545', 'CORRIENTE', 1000.00, 1000.00, TRUE, 'c1');
-
--- -- Insertar cuentas para Marianela Montalvo
--- INSERT INTO cuentas (id, account_number, account_type, initial_balance, current_balance, status, cliente_id)
--- VALUES
--- ('acc2', '225487', 'CORRIENTE', 1000.00, 1000.00, TRUE, 'c2'),
--- ('acc4', '496825', 'AHORRO', 540.00, 540.00, TRUE, 'c2');
-
--- -- Insertar cuentas para Juan Osorio
--- INSERT INTO cuentas (id, account_number, account_type, initial_balance, current_balance, status, cliente_id)
--- VALUES
--- ('acc3', '452578', 'CORRIENTE', 2000.00, 2000.00, TRUE, 'c3');
-
--- -- Insertar movimientos de ejemplo
--- INSERT INTO movimientos (id, date, description, transaction_type, amount, balance, cuenta_id)
--- VALUES
--- ('mov1', '2022-02-08 10:00:00', 'Retiro de 575', 'DEBITO', 575.00, 1425.00, 'acc1'),
--- ('mov2', '2022-02-10 11:00:00', 'Depósito de 600', 'CREDITO', 600.00, 1600.00, 'acc2'),
--- ('mov3', '2022-02-12 12:00:00', 'Depósito de 150', 'CREDITO', 150.00, 2150.00, 'acc3'),
--- ('mov4', '2022-02-08 09:00:00', 'Retiro de 540', 'DEBITO', 540.00, 0.00, 'acc4'),
-
+#Personas
+INSERT INTO `personas` VALUES ('72108b30-d08b-4e48-a8ad-11ff7f350547','CLIENTE','Juan Perez upd','Masculino',18,'1234567890','Ecuador','0987654321','1234',0,'2026-01-15 13:43:42','2026-01-15 14:11:15'),('af8e0459-eef6-498f-8cec-e48c59934961','CLIENTE','Jose Lema UPD','MASCULINO',36,'1002003004','Otavalo y su principal','0987000000','1234',1,'2026-01-15 22:44:26','2026-01-15 22:46:46'),('bb43fdac-ad1b-451d-b9e6-8a6dc54383dd','CLIENTE','Marianela Montalvo','FEMENINO',32,'1002003005','Amazonas y NNUU','0975498565','5678',1,'2026-01-15 22:39:49','2026-01-15 22:39:49'),('c78913af-a15f-4b03-a24e-6fcbb6c62bbb','CLIENTE','Juan Osorio','MASCULINO',40,'1002003006','13 junio y Equinoccial','0987487587','1245',1,'2026-01-15 22:40:56','2026-01-15 22:40:56');
+#Cuentas
+INSERT INTO `cuentas` VALUES ('10091c17-29b9-4315-aeba-40600f6fbe69','100000','AHORRO',1000.00,1488.00,1,'72108b30-d08b-4e48-a8ad-11ff7f350547','2026-01-15 13:44:18','2026-01-15 13:55:07'),('1eba8192-cb02-499a-b361-3afd8527c8a2','100002','AHORRO',300.00,810.00,1,'72108b30-d08b-4e48-a8ad-11ff7f350547','2026-01-15 15:47:33','2026-01-15 16:03:12'),('69eafe4f-9699-482f-af35-ec9aed86f593','100007','CORRIENTE',1000.00,1000.00,1,'af8e0459-eef6-498f-8cec-e48c59934961','2026-01-15 22:51:04','2026-01-15 22:51:04'),('820cdaea-6c71-47a2-969e-db15c4f95e7e','100006','AHORRO',540.00,540.00,1,'bb43fdac-ad1b-451d-b9e6-8a6dc54383dd','2026-01-15 22:50:50','2026-01-15 22:50:50'),('82690d38-de0e-4c91-bcb6-7456184f8410','100005','CORRIENTE',2000.00,2000.00,1,'c78913af-a15f-4b03-a24e-6fcbb6c62bbb','2026-01-15 22:50:14','2026-01-15 22:50:14'),('ca7c1dee-fe03-418d-99a8-46778d151eb0','100004','CORRIENTE',1000.00,1600.00,1,'bb43fdac-ad1b-451d-b9e6-8a6dc54383dd','2026-01-15 22:49:57','2026-01-15 22:55:14'),('d09ce5c3-0a99-48c5-9528-b81b0d201a4c','100001','AHORRO',200.00,1100.00,1,'72108b30-d08b-4e48-a8ad-11ff7f350547','2026-01-15 15:01:50','2026-01-15 15:31:02'),('dc2cdbc0-a0e0-4460-b8f2-0a708e3a3179','100003','AHORRO',2000.00,825.00,1,'af8e0459-eef6-498f-8cec-e48c59934961','2026-01-15 22:49:40','2026-01-15 22:56:46');
+#Movimientos
+INSERT INTO `movimientos` VALUES ('0c0a4b69-d39d-4e51-94cd-89b66d065fe5','2026-01-15 16:01:24','CREDITO PANTALLA MOVIMIENTOS','CREDITO',1000.00,1210.00,'1eba8192-cb02-499a-b361-3afd8527c8a2','2026-01-15 16:01:24'),('2047245d-c4ef-4dfc-a55d-f64486557135','2026-01-15 13:50:42','RET','DEBITO',1.00,1599.00,'10091c17-29b9-4315-aeba-40600f6fbe69','2026-01-15 13:50:42'),('2841f8fe-ecc0-413c-9b97-99b6527a214b','2026-01-15 22:56:46','RETIRO 575','DEBITO',600.00,825.00,'dc2cdbc0-a0e0-4460-b8f2-0a708e3a3179','2026-01-15 22:56:46'),('2f74a22d-d50e-4296-84db-564b46bd657c','2026-01-15 22:55:14','RETIRO 575','CREDITO',600.00,1600.00,'ca7c1dee-fe03-418d-99a8-46778d151eb0','2026-01-15 22:55:14'),('34c9389c-37a9-4798-81a3-365583746231','2026-01-15 15:59:10','DEBITO','DEBITO',100.00,210.00,'1eba8192-cb02-499a-b361-3afd8527c8a2','2026-01-15 15:59:10'),('3a80559d-e7cd-4af9-b540-94840a92e4b1','2026-01-15 13:45:11','DEPÓSITO 600','CREDITO',600.00,1600.00,'10091c17-29b9-4315-aeba-40600f6fbe69','2026-01-15 13:45:11'),('51e17e6d-9aff-4d02-9512-8c9dbabf127a','2026-01-15 15:58:35','CREDITO','CREDITO',10.00,310.00,'1eba8192-cb02-499a-b361-3afd8527c8a2','2026-01-15 15:58:35'),('57c60a3b-128b-4e86-b2ea-8b8d2d65d177','2026-01-15 15:30:37','CREDITO','CREDITO',1000.00,1200.00,'d09ce5c3-0a99-48c5-9528-b81b0d201a4c','2026-01-15 15:30:37'),('5bcd967c-0456-40b7-bba7-97c2bb093f58','2026-01-15 15:31:02','DEBITO','DEBITO',100.00,1100.00,'d09ce5c3-0a99-48c5-9528-b81b0d201a4c','2026-01-15 15:31:02'),('65ec529c-59a2-49fc-bf0a-42da6840a6ea','2026-01-15 13:55:07','RETIRO','DEBITO',111.00,1488.00,'10091c17-29b9-4315-aeba-40600f6fbe69','2026-01-15 13:55:07'),('84854fd0-0927-4e1e-9cb5-9634af93378e','2026-01-15 22:54:25','RETIRO 575','DEBITO',575.00,1425.00,'dc2cdbc0-a0e0-4460-b8f2-0a708e3a3179','2026-01-15 22:54:25'),('98c78f2c-7b2c-4c7e-83a0-4aaf835dd316','2026-01-15 16:03:12','CREDITO PANTALLA DE CLIENTES','CREDITO',100.00,810.00,'1eba8192-cb02-499a-b361-3afd8527c8a2','2026-01-15 16:03:12'),('f4fc767f-5657-45fa-be61-4b54d6c78cd6','2026-01-15 16:01:50','DEBITO PANTALLA MOVIMIENTOS','DEBITO',500.00,710.00,'1eba8192-cb02-499a-b361-3afd8527c8a2','2026-01-15 16:01:50');
 
 

@@ -1,0 +1,118 @@
+{
+  "customer": {
+    "id": "72108b30-d08b-4e48-a8ad-11ff7f350547",
+    "name": "Juan Perez upd"
+  },
+  "range": {
+    "from": "2026-01-01",
+    "to": "2026-01-15"
+  },
+  "accounts": [
+    {
+      "accountNumber": "100000",
+      "accountType": "AHORRO",
+      "initialBalance": 1000,
+      "status": true,
+      "transactions": [
+        {
+          "id": "3a80559d-e7cd-4af9-b540-94840a92e4b1",
+          "date": "2026-01-15T13:45:11",
+          "transactionType": "CREDITO",
+          "amount": 600,
+          "balance": 1600
+        },
+        {
+          "id": "2047245d-c4ef-4dfc-a55d-f64486557135",
+          "date": "2026-01-15T13:50:42",
+          "transactionType": "DEBITO",
+          "amount": 1,
+          "balance": 1599
+        },
+        {
+          "id": "65ec529c-59a2-49fc-bf0a-42da6840a6ea",
+          "date": "2026-01-15T13:55:07",
+          "transactionType": "DEBITO",
+          "amount": 111,
+          "balance": 1488
+        }
+      ],
+      "totals": {
+        "debits": 112,
+        "credits": 600
+      }
+    },
+    {
+      "accountNumber": "100002",
+      "accountType": "AHORRO",
+      "initialBalance": 300,
+      "status": true,
+      "transactions": [
+        {
+          "id": "51e17e6d-9aff-4d02-9512-8c9dbabf127a",
+          "date": "2026-01-15T15:58:35",
+          "transactionType": "CREDITO",
+          "amount": 10,
+          "balance": 310
+        },
+        {
+          "id": "34c9389c-37a9-4798-81a3-365583746231",
+          "date": "2026-01-15T15:59:10",
+          "transactionType": "DEBITO",
+          "amount": 100,
+          "balance": 210
+        },
+        {
+          "id": "0c0a4b69-d39d-4e51-94cd-89b66d065fe5",
+          "date": "2026-01-15T16:01:24",
+          "transactionType": "CREDITO",
+          "amount": 1000,
+          "balance": 1210
+        },
+        {
+          "id": "f4fc767f-5657-45fa-be61-4b54d6c78cd6",
+          "date": "2026-01-15T16:01:50",
+          "transactionType": "DEBITO",
+          "amount": 500,
+          "balance": 710
+        },
+        {
+          "id": "98c78f2c-7b2c-4c7e-83a0-4aaf835dd316",
+          "date": "2026-01-15T16:03:12",
+          "transactionType": "CREDITO",
+          "amount": 100,
+          "balance": 810
+        }
+      ],
+      "totals": {
+        "debits": 600,
+        "credits": 1110
+      }
+    },
+    {
+      "accountNumber": "100001",
+      "accountType": "AHORRO",
+      "initialBalance": 200,
+      "status": true,
+      "transactions": [
+        {
+          "id": "57c60a3b-128b-4e86-b2ea-8b8d2d65d177",
+          "date": "2026-01-15T15:30:37",
+          "transactionType": "CREDITO",
+          "amount": 1000,
+          "balance": 1200
+        },
+        {
+          "id": "5bcd967c-0456-40b7-bba7-97c2bb093f58",
+          "date": "2026-01-15T15:31:02",
+          "transactionType": "DEBITO",
+          "amount": 100,
+          "balance": 1100
+        }
+      ],
+      "totals": {
+        "debits": 100,
+        "credits": 1000
+      }
+    }
+  ]
+}

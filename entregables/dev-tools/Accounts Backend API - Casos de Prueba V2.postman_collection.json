@@ -1,0 +1,987 @@
+{
+	"info": {
+		"_postman_id": "4f6cf33f-9552-47e0-ba5f-c5918f9a737c",
+		"name": "Accounts Backend API - Casos de Prueba V2",
+		"description": "Colección completa de pruebas para la API de Cuentas Bancarias",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16893698",
+		"_collection_link": "https://dark-rocket-831531.postman.co/workspace/52ce96e7-0580-4b5d-af86-e4eed7d496b2/collection/16893698-4f6cf33f-9552-47e0-ba5f-c5918f9a737c?action=share&source=collection_link&creator=16893698"
+	},
+	"item": [
+		{
+			"name": "1. Clientes",
+			"item": [
+				{
+					"name": "1.1 Crear Jose Lema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has id\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.exist;",
+									"    pm.collectionVariables.set(\"joseLemaId\", jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jose Lema\",\n  \"gender\": \"MASCULINO\",\n  \"age\": 35,\n  \"identification\": \"1002003004\",\n  \"address\": \"Otavalo y su principal\",\n  \"phone\": \"0985247885\",\n  \"password\": \"1234\",\n  \"status\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Crear Marianela Montalvo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"marianelaId\", jsonData.id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Marianela Montalvo\",\n  \"gender\": \"FEMENINO\",\n  \"age\": 32,\n  \"identification\": \"1002003005\",\n  \"address\": \"Amazonas y NNUU\",\n  \"phone\": \"0975498565\",\n  \"password\": \"5678\",\n  \"status\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Crear Juan Osorio",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"juanOsorioId\", jsonData.id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Juan Osorio\",\n  \"gender\": \"MASCULINO\",\n  \"age\": 40,\n  \"identification\": \"1002003006\",\n  \"address\": \"13 junio y Equinoccial\",\n  \"phone\": \"0987487587\",\n  \"password\": \"1245\",\n  \"status\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Listar Clientes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.5 Buscar Cliente por nombre",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes?q=Juan O",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "Juan O"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.6 Obtener Cliente por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes/{{joseLemaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes",
+								"{{joseLemaId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.7 Actualizar Cliente (PUT)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Jose Lema UPD\",\n  \"gender\": \"MASCULINO\",\n  \"age\": 36,\n  \"identification\": \"1002003004\",\n  \"address\": \"Otavalo y su principal\",\n  \"phone\": \"0985247885\",\n  \"password\": \"1234\",\n  \"status\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes/{{joseLemaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes",
+								"{{joseLemaId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.8 Actualizar Cliente Parcial (PATCH)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"0987000000\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes/{{joseLemaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes",
+								"{{joseLemaId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.9 Validar Identificación Duplicada",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"Error message contains 'clave única'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('clave única');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Cliente Duplicado\",\n  \"gender\": \"MASCULINO\",\n  \"age\": 30,\n  \"identification\": \"1002003004\",\n  \"address\": \"Direccion Test\",\n  \"phone\": \"0999999999\",\n  \"password\": \"1234\",\n  \"status\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/clientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"clientes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Cuentas",
+			"item": [
+				{
+					"name": "2.2 Crear Cuenta - Marianela (Corriente)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"cuenta225487Id\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"225487\",\n  \"accountType\": \"CORRIENTE\",\n  \"initialBalance\": 1000,\n  \"status\": true,\n  \"customerId\": \"{{marianelaId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.1 Crear Cuenta - Jose Lema (Ahorro)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"cuenta478578Id\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"478578\",\n  \"accountType\": \"AHORRO\",\n  \"initialBalance\": 2000,\n  \"status\": true,\n  \"customerId\": \"{{joseLemaId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Crear Cuenta - Juan Osorio (Corriente)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"452578\",\n  \"accountType\": \"CORRIENTE\",\n  \"initialBalance\": 2000,\n  \"status\": true,\n  \"customerId\": \"{{juanOsorioId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Crear Cuenta - Marianela (Ahorro)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"496825\",\n  \"accountType\": \"AHORRO\",\n  \"initialBalance\": 540,\n  \"status\": true,\n  \"customerId\": \"{{marianelaId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 Crear Cuenta - Jose Lema (Corriente)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountNumber\": \"585545\",\n  \"accountType\": \"CORRIENTE\",\n  \"initialBalance\": 1000,\n  \"status\": true,\n  \"customerId\": \"{{joseLemaId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.6 Listar Cuentas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas?page=1&size=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.7 Filtrar Cuentas por Cliente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas?clienteId={{marianelaId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							],
+							"query": [
+								{
+									"key": "clienteId",
+									"value": "{{marianelaId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.8 Buscar Cuenta por número",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cuentas?q=100004",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cuentas"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "100004"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Movimientos",
+			"item": [
+				{
+					"name": "3.1 Retiro 575 - Cuenta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"Balance is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.balance).to.eql(1425);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountId\": \"{{cuenta478578Id}}\",\n  \"transactionType\": \"DEBITO\",\n  \"amount\": 575,\n  \"description\": \"RETIRO 575\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/movimientos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"movimientos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Depósito 600 - Cuenta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"Balance is correct\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.balance).to.eql(1600);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": \"{{cuenta225487Id}}\",\n    \"transactionType\": \"CREDITO\",\n    \"description\": \"RETIRO 575\",\n    \"amount\": 600\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/movimientos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"movimientos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Validar Saldo No Disponible",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"Error message is 'Saldo no disponible'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('Saldo no disponible');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": \"{{cuenta478578Id}}\",\n    \"transactionType\": \"DEBITO\",\n    \"description\": \"RETIRO 575\",\n    \"amount\": 5000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/movimientos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"movimientos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.4 Validar Cupo Diario Excedido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"Error message is 'Cupo diario excedido'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('Cupo diario');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"accountId\": \"{{cuenta478578Id}}\",\n  \"transactionType\": \"DEBITO\",\n    \"description\": \"RETIRO 575\",\n  \"amount\": 600\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/movimientos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"movimientos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.5 Listar Movimientos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/movimientos?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"movimientos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.6 Filtrar Movimientos por Cuenta",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/movimientos?cuentaId={{cuenta225487Id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"movimientos"
+							],
+							"query": [
+								{
+									"key": "cuentaId",
+									"value": "{{cuenta225487Id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.7 Filtrar Movimientos por Rango de Fechas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/movimientos?from=2025-02-08&to=2026-01-15",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"movimientos"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "2025-02-08"
+								},
+								{
+									"key": "to",
+									"value": "2026-01-15"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Reportes",
+			"item": [
+				{
+					"name": "4.1 Reporte JSON - Marianela Montalvo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response has customer info\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.customer).to.exist;",
+									"    pm.expect(jsonData.accounts).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/reportes?clienteId={{marianelaId}}&from=2022-02-08&to=2022-02-10&format=json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reportes"
+							],
+							"query": [
+								{
+									"key": "clienteId",
+									"value": "{{marianelaId}}"
+								},
+								{
+									"key": "from",
+									"value": "2022-02-08"
+								},
+								{
+									"key": "to",
+									"value": "2022-02-10"
+								},
+								{
+									"key": "format",
+									"value": "json"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Reporte PDF - Marianela Montalvo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response has base64 PDF\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.base64).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/reportes?clienteId={{marianelaId}}&from=2022-02-08&to=2022-02-10&format=pdf",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"reportes"
+							],
+							"query": [
+								{
+									"key": "clienteId",
+									"value": "{{marianelaId}}"
+								},
+								{
+									"key": "from",
+									"value": "2022-02-08"
+								},
+								{
+									"key": "to",
+									"value": "2022-02-10"
+								},
+								{
+									"key": "format",
+									"value": "pdf"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "joseLemaId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "marianelaId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "juanOsorioId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cuenta478578Id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cuenta225487Id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

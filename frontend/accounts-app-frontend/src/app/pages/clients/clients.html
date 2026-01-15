@@ -21,6 +21,7 @@
       <thead class="data-table__head">
         <tr class="data-table__head-row">
           <th class="data-table__header">Nombre</th>
+          <th class="data-table__header">Género</th>
           <th class="data-table__header">Dirección</th>
           <th class="data-table__header">Teléfono</th>
           <th class="data-table__header">Estado</th>
@@ -30,6 +31,7 @@
       <tbody>
         <tr class="data-table__body-row" *ngFor="let client of clients$ | async">
           <td class="data-table__cell">{{ client.name }}</td>
+          <td class="data-table__cell">{{ client.gender }}</td>
           <td class="data-table__cell">{{ client.address }}</td>
           <td class="data-table__cell">{{ client.phone }}</td>
           <td class="data-table__cell">
@@ -39,6 +41,8 @@
           </td>
           <td class="data-table__cell">
             <div class="actions">
+              <button class="actions__button" (click)="onViewAccounts(client.id!)" title="Ver Cuentas"><i class="fas fa-bank"></i></button>
+              <button class="actions__button" (click)="onViewReports(client.id!)" title="Ver Reportes"><i class="fas fa-file-pdf"></i></button>
               <button class="actions__button" (click)="onEditClient(client.id!)" title="Editar"><i class="fas fa-edit"></i></button>
               <button class="actions__button" (click)="onDeleteClient(client.id!)" title="Eliminar"><i class="fas fa-trash"></i></button>
             </div>
@@ -71,9 +75,10 @@
         <div class="form-group">
           <label>Género <span class="form-required">*</span></label>
           <select [(ngModel)]="formData.gender" class="form-input" required>
-            <option value="">Seleccionar</option>
-            <option value="M">Masculino</option>
-            <option value="F">Femenino</option>
+            <option [ngValue]="">Seleccionar</option>
+            <option [ngValue]="'MASCULINO'">Masculino</option>
+            <option [ngValue]="'FEMENINO'">Femenino</option>
+            <option [ngValue]="'OTRO'">Otro</option>
           </select>
         </div>
         <div class="form-group">
@@ -83,8 +88,8 @@
         </div>
         <div class="form-group">
           <label>Cédula <span class="form-required">*</span></label>
-          <input type="text" [(ngModel)]="formData.identification" placeholder="Ej: 1234567890" class="form-input" required pattern="[0-9]{10}" />
-          <small class="form-hint">10 dígitos sin caracteres especiales</small>
+          <input type="text" [(ngModel)]="formData.identification" placeholder="Ej: 1234567890" class="form-input" required pattern="[0-9]{10}" [disabled]="modalMode === 'edit'" />
+          <small class="form-hint">10 dígitos sin caracteres especiales{{ modalMode === 'edit' ? ' (No editable)' : '' }}</small>
         </div>
         <div class="form-group">
           <label>Dirección <span class="form-required">*</span></label>
@@ -97,16 +102,15 @@
           <small class="form-hint">10 dígitos sin caracteres especiales</small>
         </div>
         <div class="form-group">
-          <label>Contraseña <span class="form-required">*</span></label>
+          <label>Clave de Tarjeta <span class="form-required">*</span></label>
           <div class="password-input-group">
-            <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="formData.password" placeholder="Contraseña" class="form-input" 
-            required minlength="4" 
-            maxlength="4"/>
-            <button type="button" class="password-toggle" (click)="showPassword = !showPassword" title="Ver/Ocultar contraseña">
+            <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="formData.password" placeholder="0000" class="form-input" 
+            required minlength="4" maxlength="4" pattern="[0-9]{4}"/>
+            <button type="button" class="password-toggle" (click)="showPassword = !showPassword" title="Ver/Ocultar clave">
               <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
             </button>
           </div>
-          <small class="form-hint">Mínimo 4 caracteres</small>
+          <small class="form-hint">Exactamente 4 dígitos</small>
         </div>
         <div class="form-group">
           <label>
@@ -119,6 +123,188 @@
         <button class="btn btn--secondary" (click)="onCloseModal()">Cancelar</button>
         <button class="btn btn--primary" (click)="onSaveClient()">Guardar</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cuentas y Movimientos -->
+<div *ngIf="showAccountsModal" class="modal-overlay" (click)="onCloseAccountsModal()">
+  <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header__info">
+        <h3 class="modal-header__title">Cuentas y Movimientos</h3>
+        <p class="modal-header__client" *ngIf="currentClient">
+          Cliente: <strong>{{ currentClient.name }}</strong> ({{ currentClient.identification }})
+        </p>
+      </div>
+      <button class="modal-close" (click)="onCloseAccountsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body modal-body--split">
+      <!-- Panel izquierdo: Cuentas -->
+      <div class="modal-panel">
+        <div class="modal-panel__header">
+          <h4>Cuentas</h4>
+          <button class="btn btn--sm btn--primary" (click)="onOpenAccountForm('create')">
+            <i class="fas fa-plus"></i> Nueva Cuenta
+          </button>
+        </div>
+        <div class="modal-panel__content">
+          <div *ngIf="clientAccounts && clientAccounts.length > 0" class="accounts-list">
+            <div *ngFor="let account of clientAccounts" 
+                 class="account-item" 
+                 [class.account-item--selected]="selectedAccountId === account.id"
+                 (click)="onSelectAccount(account)">
+              <div class="account-item__header">
+                <span class="account-item__number">{{ account.accountNumber }}</span>
+                <span class="account-item__type">{{ account.accountType }}</span>
+              </div>
+              <div class="account-item__balance">
+                <small>Saldo:</small>
+                <strong>${{ account.currentBalance | number:'1.2-2' }}</strong>
+              </div>
+              <div class="account-item__actions">
+                <button class="account-item__btn" (click)="onEditAccount(account); $event.stopPropagation()" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="account-item__btn account-item__btn--danger" (click)="onDeleteAccount(account.id); $event.stopPropagation()" title="Eliminar">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!clientAccounts || clientAccounts.length === 0" class="empty-state">
+            <p>No hay cuentas para este cliente</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel derecho: Movimientos -->
+      <div class="modal-panel">
+        <div class="modal-panel__header">
+          <h4>Movimientos {{ selectedAccountId ? '- ' + getSelectedAccountNumber() : '' }}</h4>
+          <button class="btn btn--sm btn--primary" (click)="onOpenMovementForm('create')" [disabled]="!selectedAccountId">
+            <i class="fas fa-plus"></i> Nuevo Movimiento
+          </button>
+        </div>
+        <div class="modal-panel__content">
+          <div *ngIf="selectedAccountId && accountMovements && accountMovements.length > 0" class="movements-list">
+            <div *ngFor="let movement of accountMovements" class="movement-item">
+              <div class="movement-item__date">
+                {{ movement.date | date:'dd/MM/yyyy' }}
+              </div>
+              <div class="movement-item__description">
+                {{ movement.description }}
+              </div>
+              <div class="movement-item__amount" [class.movement-item__amount--debit]="movement.transactionType === 'DEBITO'">
+                {{ movement.transactionType === 'CREDITO' ? '+' : '-' }}${{ movement.amount | number:'1.2-2' }}
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!selectedAccountId" class="empty-state">
+            <p>Selecciona una cuenta para ver sus movimientos</p>
+          </div>
+          <div *ngIf="selectedAccountId && (!accountMovements || accountMovements.length === 0)" class="empty-state">
+            <p>No hay movimientos para esta cuenta</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Formulario de Cuenta -->
+<div *ngIf="showAccountFormModal" class="modal-overlay" (click)="showAccountFormModal = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modalMode === 'create' ? 'Nueva Cuenta' : 'Editar Cuenta' }}</h3>
+      <button class="modal-close" (click)="showAccountFormModal = false">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tipo de Cuenta <span class="form-required">*</span></label>
+        <select [(ngModel)]="accountFormData.accountType" class="form-input">
+          <option value="AHORRO">Ahorro</option>
+          <option value="CORRIENTE">Corriente</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Saldo Inicial <span class="form-required">*</span></label>
+        <input type="number" [(ngModel)]="accountFormData.initialBalance" placeholder="0.00" class="form-input" [disabled]="modalMode === 'edit'" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" (click)="showAccountFormModal = false">Cancelar</button>
+      <button class="btn btn--primary" (click)="onSaveAccount()">{{ modalMode === 'create' ? 'Crear' : 'Actualizar' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Formulario de Movimiento -->
+<div *ngIf="showMovementFormModal" class="modal-overlay" (click)="showMovementFormModal = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Registrar Nuevo Movimiento</h3>
+      <button class="modal-close" (click)="showMovementFormModal = false">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Descripción <span class="form-required">*</span></label>
+        <input type="text" [(ngModel)]="movementFormData.description" placeholder="Ej: Depósito, Retiro" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label>Tipo de Movimiento <span class="form-required">*</span></label>
+        <select [(ngModel)]="movementFormData.transactionType" class="form-input">
+          <option value="CREDITO">Crédito</option>
+          <option value="DEBITO">Débito</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Monto <span class="form-required">*</span></label>
+        <input type="number" [(ngModel)]="movementFormData.amount" placeholder="0.00" class="form-input" min="0" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" (click)="showMovementFormModal = false">Cancelar</button>
+      <button class="btn btn--primary" (click)="onSaveMovement()">Registrar Movimiento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Reportes -->
+<div *ngIf="showReportsModal" class="modal-overlay" (click)="onCloseReportsModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-header__title">Reportes del Cliente</h3>
+      <button class="modal-close" (click)="onCloseReportsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-reports [clientIdFilter]="selectedClientId" [isModal]="true"></app-reports>
+    </div>
+  </div>
+</div>
+<!-- Modal de Confirmación de Eliminación -->
+<div *ngIf="showConfirmDeleteModal" class="modal-overlay" (click)="onCancelDelete()">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-header__title">Confirmar Eliminación</h3>
+      <button class="modal-close" (click)="onCancelDelete()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-message">{{ confirmDeleteMessage }}</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" (click)="onCancelDelete()">Cancelar</button>
+      <button class="btn btn--danger" (click)="onConfirmDelete()">Eliminar</button>
     </div>
   </div>
 </div>

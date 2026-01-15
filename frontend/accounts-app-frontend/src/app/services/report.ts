@@ -40,7 +40,6 @@ export class Report {
 
     return this.http.get<any>(`${this.apiUrl}`, { params }).pipe(
       map((response: any) => {
-        // El servidor devuelve {"base64": "..."}, necesitamos decodificar
         if (response.base64) {
           const binaryString = atob(response.base64);
           const bytes = new Uint8Array(binaryString.length);

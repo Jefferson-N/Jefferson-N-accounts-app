@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable, BehaviorSubject } from 'rxjs';
@@ -7,23 +7,22 @@ import { Account } from '../../services/account';
 import { Client } from '../../services/client';
 import { NotificationService } from '../../services/notification';
 import { Cuenta, AccountRequest, Cliente } from '../../services/models';
+import { Movements } from '../movements/movements';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Movements],
   templateUrl: './accounts.html',
   styleUrl: './accounts.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Accounts implements OnInit {
+  @Input() clientIdFilter: string = '';
+  @Input() isModal: boolean = false;
+  
   searchTerm = '';
   accounts$!: Observable<Cuenta[]>;
-  clients$!: Observable<Cliente[]>;
-  allClients: Cliente[] = [];
-  filteredClients: Cliente[] = [];
-  clientFilterOpen = false;
-  clientSearchTerm = '';
   pagination$ = new BehaviorSubject<{ currentPage: number; pageSize: number; totalPages: number; totalRecords: number }>({
     currentPage: 1,
     pageSize: 10,
@@ -34,14 +33,25 @@ export class Accounts implements OnInit {
   showModal = false;
   modalMode: 'create' | 'edit' = 'create';
   selectedAccountId: string = '';
+  selectedAccount: Cuenta | null = null;
+  
+  // Modal de movimientos
+  showMovementsModal = false;
 
-  formData: AccountRequest = {
-    accountNumber: '',
+  // Modal de confirmación
+  showConfirmDeleteModal = false;
+  confirmDeleteMessage = '';
+  confirmDeleteCallback: (() => void) | null = null;
+
+  formData: AccountRequest & { currentBalance?: number } = {
     accountType: 'AHORRO',
     initialBalance: 0,
     status: true,
-    customerId: ''
+    customerId: '',
+    currentBalance: 0
   };
+
+  filteredClients: Cliente[] = [];
 
   get currentPage(): number {
     return this.pagination$.value.currentPage;
@@ -67,29 +77,34 @@ export class Accounts implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadClients();
-    this.loadAccounts();
+    if (this.clientIdFilter) {
+      this.formData.customerId = this.clientIdFilter;
+      this.loadAccountsByClient(this.clientIdFilter);
+    } else {
+      this.loadAccounts();
+    }
   }
 
-  loadClients(): void {
-    this.clientService.listar(0, 100, '').pipe(
-      switchMap((response: any) => 
-        new Promise<Cliente[]>(resolve => {
-          this.allClients = response.content || [];
-          this.filteredClients = this.allClients;
-          resolve(this.allClients);
-        })
-      ),
-      shareReplay(1)
-    ).subscribe({
-      next: (clients) => {
-        this.clients$ = new Promise(resolve => resolve(clients)) as any;
+  loadAccountsByClient(clientId: string): void {
+    this.accountService.listarPorCliente(clientId).subscribe({
+      next: (response: any) => {
+        this.accounts$ = new Promise(resolve => resolve(response.content || response)) as any;
         this.cdr.markForCheck();
       },
       error: (err: any) => {
-        console.error('Error loading clients:', err);
+        console.error('Error loading accounts:', err);
         this.cdr.markForCheck();
       }
+    });
+  }
+
+  loadClients(): void {
+    this.clientService.listar(0, 200).subscribe({
+      next: (response: any) => {
+        this.filteredClients = response.content || response || [];
+        this.cdr.markForCheck();
+      },
+      error: () => this.cdr.markForCheck()
     });
   }
 
@@ -130,49 +145,17 @@ export class Accounts implements OnInit {
     this.loadAccounts();
   }
 
-  onClientFilterToggle(): void {
-    this.clientFilterOpen = !this.clientFilterOpen;
-    if (this.clientFilterOpen) {
-      this.filterClients();
-    }
-  }
-
-  filterClients(): void {
-    if (!this.clientSearchTerm.trim()) {
-      this.filteredClients = [...this.allClients];
-    } else {
-      const term = this.clientSearchTerm.toLowerCase();
-      this.filteredClients = this.allClients.filter(client =>
-        client.name.toLowerCase().includes(term) ||
-        client.identification.toLowerCase().includes(term)
-      );
-    }
-  }
-
-  onClientSelected(clientId: string): void {
-    this.formData.customerId = clientId;
-    this.clientFilterOpen = false;
-    this.clientSearchTerm = '';
-    this.cdr.markForCheck();
-  }
-
-  getSelectedClientName(): string {
-    if (!this.formData.customerId) {
-      return 'Seleccionar Cliente';
-    }
-    const client = this.allClients.find(c => c.id === this.formData.customerId);
-    return client ? client.name : 'Seleccionar Cliente';
-  }
-
   onNewAccount(): void {
     this.modalMode = 'create';
+    this.selectedAccount = null;
     this.formData = {
-      accountNumber: '',
       accountType: 'AHORRO',
       initialBalance: 0,
       status: true,
-      customerId: ''
+      customerId: '',
+      currentBalance: 0
     };
+    this.loadClients();
     this.showModal = true;
     this.cdr.markForCheck();
   }
@@ -182,36 +165,40 @@ export class Accounts implements OnInit {
       next: (account: Cuenta) => {
         this.modalMode = 'edit';
         this.selectedAccountId = id;
+        this.selectedAccount = account; 
         this.formData = {
-          accountNumber: account.accountNumber,
           accountType: account.accountType,
           initialBalance: account.initialBalance,
           status: account.status,
-          customerId: account.customerId || ''
+          customerId: account.customerId || '',
+          currentBalance: account.currentBalance || 0
         };
         this.showModal = true;
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: () => {
-        // El interceptor ya mostró la notificación de error
         this.cdr.markForCheck();
       }
     });
   }
 
   onDeleteAccount(id: string): void {
-    if (confirm('¿Está seguro de que desea eliminar esta cuenta?')) {
+    this.confirmDeleteMessage = '¿Está seguro de que desea eliminar esta cuenta?';
+    this.confirmDeleteCallback = () => {
       this.accountService.eliminar(id).subscribe({
         next: () => {
           this.notificationService.success('Cuenta eliminada correctamente');
+          this.showConfirmDeleteModal = false;
           this.loadAccounts();
         },
         error: () => {
-          // El interceptor ya mostró la notificación de error
+          this.showConfirmDeleteModal = false;
           this.cdr.markForCheck();
         }
       });
-    }
+    };
+    this.showConfirmDeleteModal = true;
+    this.cdr.markForCheck();
   }
 
   onSaveAccount(): void {
@@ -231,12 +218,16 @@ export class Accounts implements OnInit {
           this.cdr.markForCheck();
         },
         error: () => {
-          // El interceptor ya mostró la notificación de error
           this.cdr.markForCheck();
         }
       });
     } else {
-      this.accountService.actualizar(this.selectedAccountId, this.formData as Cuenta).subscribe({
+      // En edición, solo enviar los campos que se pueden actualizar
+      const updateData = {
+        accountType: this.formData.accountType,
+        status: this.formData.status
+      };
+      this.accountService.actualizarParcial(this.selectedAccountId, updateData).subscribe({
         next: () => {
           this.notificationService.success('Cuenta actualizada correctamente');
           this.showModal = false;
@@ -244,7 +235,6 @@ export class Accounts implements OnInit {
           this.cdr.markForCheck();
         },
         error: () => {
-          // El interceptor ya mostró la notificación de error
           this.cdr.markForCheck();
         }
       });
@@ -254,13 +244,6 @@ export class Accounts implements OnInit {
   validateAccountForm(): string[] {
     const errors: string[] = [];
 
-    if (!this.formData.accountNumber || this.formData.accountNumber.trim().length < 6) {
-      errors.push('El número de cuenta debe tener al menos 6 caracteres');
-    }
-    if (this.formData.accountNumber && this.formData.accountNumber.length > 20) {
-      errors.push('El número de cuenta no puede exceder 20 caracteres');
-    }
-
     if (!this.formData.accountType) {
       errors.push('El tipo de cuenta es requerido');
     }
@@ -269,7 +252,7 @@ export class Accounts implements OnInit {
       errors.push('El saldo inicial debe ser mayor o igual a 0');
     }
 
-    if (!this.formData.customerId) {
+    if (this.modalMode === 'create' && !this.formData.customerId) {
       errors.push('El cliente es requerido');
     }
 
@@ -278,6 +261,25 @@ export class Accounts implements OnInit {
 
   onCloseModal(): void {
     this.showModal = false;
+    this.cdr.markForCheck();
+  }
+
+  onViewMovements(accountId: string): void {
+    this.accountService.obtener(accountId).subscribe({
+      next: (account: Cuenta) => {
+        this.selectedAccount = account;
+        this.selectedAccountId = accountId;
+        this.showMovementsModal = true;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  onCloseMovementsModal(): void {
+    this.showMovementsModal = false;
     this.cdr.markForCheck();
   }
 
@@ -293,5 +295,18 @@ export class Accounts implements OnInit {
       this.pagination$.next({ ...this.pagination$.value, currentPage: this.currentPage + 1 });
       this.loadAccounts();
     }
+  }
+
+  // Métodos para modal de confirmación
+  onConfirmDelete(): void {
+    if (this.confirmDeleteCallback) {
+      this.confirmDeleteCallback();
+    }
+  }
+
+  onCancelDelete(): void {
+    this.showConfirmDeleteModal = false;
+    this.confirmDeleteCallback = null;
+    this.cdr.markForCheck();
   }
 }

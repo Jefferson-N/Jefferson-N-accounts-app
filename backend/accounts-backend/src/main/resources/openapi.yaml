@@ -463,7 +463,7 @@ components:
           description: Nombre del cliente
         gender:
           type: string
-          enum: [Masculino, Femenino, Otro]
+          enum: [MASCULINO, FEMENINO, OTRO]
           description: Género del cliente
         age:
           type: integer

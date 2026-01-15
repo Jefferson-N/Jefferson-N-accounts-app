@@ -9,19 +9,20 @@
       <div class="form-group">
         <label>Cliente <span class="form-required">*</span></label>
         <div class="client-filter">
-          <div class="client-filter__header" (click)="onClientFilterToggle()">
+          <div class="client-filter__header" (click)="onClientFilterToggle()" [class.disabled]="isModal">
             <input 
               type="text" 
               [value]="getSelectedClientName()"
               placeholder="Seleccionar Cliente..."
               class="form-input"
               readonly="readonly"
+              [disabled]="isModal"
             />
-            <button type="button" class="client-filter__toggle" title="Abrir filtro">
+            <button type="button" class="client-filter__toggle" title="Abrir filtro" *ngIf="!isModal">
               <i [class]="clientFilterOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
             </button>
           </div>
-          <div *ngIf="clientFilterOpen" class="client-filter__dropdown">
+          <div *ngIf="clientFilterOpen && !isModal" class="client-filter__dropdown">
             <div class="client-filter__search">
               <input 
                 type="text" 

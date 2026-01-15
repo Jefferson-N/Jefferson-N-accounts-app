@@ -51,12 +51,12 @@ export class Movement {
   }
 
   listarPorCuenta(cuentaId: string, page: number = 0, size: number = 10): Observable<PaginatedResponse<Movimiento>> {
-    const params = new HttpParams()
-      .set('cuentaId', cuentaId)
-      .set('page', page.toString())
-      .set('size', size.toString());
-
-    return this.http.get<PaginatedResponse<Movimiento>>(`${this.apiUrl}/cuenta`, { params });
+    return this.http.get<PaginatedResponse<Movimiento>>(`${this.apiUrl}`, { 
+      params: new HttpParams()
+        .set('cuentaId', cuentaId)
+        .set('page', page.toString())
+        .set('size', size.toString())
+    });
   }
 
   listarPorFechas(fechaInicio: string, fechaFin: string, page: number = 0, size: number = 10): Observable<PaginatedResponse<Movimiento>> {

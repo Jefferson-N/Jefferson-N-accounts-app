@@ -2,7 +2,7 @@
   <div class="page-header">
     <h2 class="page-header__title">Cuentas</h2>
   </div>
-  <div class="toolbar">
+  <div class="toolbar" *ngIf="!isModal">
     <div class="toolbar__search">
       <input 
         type="text" 
@@ -39,8 +39,9 @@
           </td>
           <td class="data-table__cell">
             <div class="actions">
-              <button class="actions__button" (click)="onEditAccount(account.id!)" title="Editar"><i class="fas fa-edit"></i></button>
-              <button class="actions__button" (click)="onDeleteAccount(account.id!)" title="Eliminar"><i class="fas fa-trash"></i></button>
+              <button class="actions__button" (click)="onViewMovements(account.id!)" title="Ver Movimientos"><i class="fas fa-exchange-alt"></i></button>
+              <button class="actions__button" (click)="onEditAccount(account.id!)" title="Editar" *ngIf="!isModal"><i class="fas fa-edit"></i></button>
+              <button class="actions__button" (click)="onDeleteAccount(account.id!)" title="Eliminar" *ngIf="!isModal"><i class="fas fa-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -63,62 +64,27 @@
         <h3>{{ modalMode === 'create' ? 'Nueva Cuenta' : 'Editar Cuenta' }}</h3>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Número de Cuenta <span class="form-required">*</span></label>
-          <input type="text" [(ngModel)]="formData.accountNumber" placeholder="Ej: 100001" class="form-input" required minlength="6" maxlength="20" />
-          <small class="form-hint">6-20 caracteres alpanuméricos</small>
+        <div class="form-group" *ngIf="modalMode === 'create'">
+          <label>Cliente <span class="form-required">*</span></label>
+          <select [(ngModel)]="formData.customerId" class="form-input" required>
+            <option [ngValue]="">Seleccionar</option>
+            <option *ngFor="let client of filteredClients" [ngValue]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
         </div>
         <div class="form-group">
           <label>Tipo de Cuenta <span class="form-required">*</span></label>
           <select [(ngModel)]="formData.accountType" class="form-input" required>
-            <option value="">Seleccionar</option>
-            <option value="AHORRO">Ahorro</option>
-            <option value="CORRIENTE">Corriente</option>
+            <option [ngValue]="">Seleccionar</option>
+            <option [ngValue]="'AHORRO'">Ahorro</option>
+            <option [ngValue]="'CORRIENTE'">Corriente</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" *ngIf="modalMode === 'create'">
           <label>Saldo Inicial <span class="form-required">*</span></label>
           <input type="number" [(ngModel)]="formData.initialBalance" placeholder="Ej: 5000.00" class="form-input" required min="0" />
           <small class="form-hint">Monto inicial (mínimo 0)</small>
-        </div>
-        <div class="form-group">
-          <label>Cliente <span class="form-required">*</span></label>
-          <div class="client-filter">
-            <div class="client-filter__header" (click)="onClientFilterToggle()">
-              <input 
-                type="text" 
-                [value]="getSelectedClientName()"
-                placeholder="Seleccionar Cliente..."
-                class="form-input"
-                readonly="readonly"
-              />
-              <button type="button" class="client-filter__toggle" title="Abrir filtro">
-                <i [class]="clientFilterOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
-              </button>
-            </div>
-            <div *ngIf="clientFilterOpen" class="client-filter__dropdown">
-              <div class="client-filter__search">
-                <input 
-                  type="text" 
-                  [(ngModel)]="clientSearchTerm"
-                  (input)="filterClients()"
-                  placeholder="Filtrar clientes..."
-                  class="client-filter__input"
-                  autofocus
-                />
-              </div>
-              <div class="client-filter__list">
-                <div 
-                  *ngFor="let client of filteredClients" 
-                  class="client-filter__item"
-                  [class.client-filter__item--selected]="formData.customerId === client.id"
-                  (click)="onClientSelected(client.id!)"
-                >
-                  <span>{{ client.name }} ({{ client.identification }})</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="form-group">
           <label>
@@ -131,6 +97,66 @@
         <button class="btn btn--secondary" (click)="onCloseModal()">Cancelar</button>
         <button class="btn btn--primary" (click)="onSaveAccount()">Guardar</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Movimientos -->
+<div *ngIf="showMovementsModal" class="modal-overlay" (click)="onCloseMovementsModal()">
+  <div class="modal-content modal-content--large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-header__title">Movimientos - Cuenta {{ selectedAccount?.accountNumber }}</h3>
+      <button class="modal-close" (click)="onCloseMovementsModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Resumen de la Cuenta -->
+      <div class="account-summary" *ngIf="selectedAccount">
+        <div class="account-summary__item">
+          <label>Número:</label>
+          <span class="account-summary__value">{{ selectedAccount.accountNumber }}</span>
+        </div>
+        <div class="account-summary__item">
+          <label>Tipo:</label>
+          <span class="account-summary__value">{{ selectedAccount.accountType }}</span>
+        </div>
+        <div class="account-summary__item">
+          <label>Saldo Inicial:</label>
+          <span class="account-summary__value">{{ selectedAccount.initialBalance | currency }}</span>
+        </div>
+        <div class="account-summary__item">
+          <label>Saldo Actual:</label>
+          <span class="account-summary__value account-summary__balance">{{ selectedAccount.currentBalance | currency }}</span>
+        </div>
+        <div class="account-summary__item">
+          <label>Estado:</label>
+          <span [ngClass]="{'badge--active': selectedAccount.status, 'badge--inactive': !selectedAccount.status}" class="badge">
+            {{ selectedAccount.status ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+      </div>
+      <hr />
+      <!-- Componente de Movimientos -->
+      <app-movements [accountIdFilter]="selectedAccountId" [isModal]="true"></app-movements>
+    </div>
+  </div>
+</div>
+<!-- Modal de Confirmación de Eliminación -->
+<div *ngIf="showConfirmDeleteModal" class="modal-overlay" (click)="onCancelDelete()">
+  <div class="modal-content modal-content--small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-header__title">Confirmar Eliminación</h3>
+      <button class="modal-close" (click)="onCancelDelete()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-message">{{ confirmDeleteMessage }}</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" (click)="onCancelDelete()">Cancelar</button>
+      <button class="btn btn--danger" (click)="onConfirmDelete()">Eliminar</button>
     </div>
   </div>
 </div>

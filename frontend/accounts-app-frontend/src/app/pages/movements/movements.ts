@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable, BehaviorSubject } from 'rxjs';
@@ -17,10 +17,14 @@ import { Movimiento, TransactionRequest, Cuenta } from '../../services/models';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Movements implements OnInit {
+  @Input() accountIdFilter: string = '';
+  @Input() isModal: boolean = false;
+  
   movements$!: Observable<Movimiento[]>;
   accounts$!: Observable<Cuenta[]>;
   allAccounts: Cuenta[] = [];
   filteredAccounts: Cuenta[] = [];
+  selectedAccount: Cuenta | null = null;
   selectedAccountId = '';
   searchTerm = '';
   accountFilterOpen = false;
@@ -38,6 +42,7 @@ export class Movements implements OnInit {
 
   formData: TransactionRequest = {
     date: new Date().toISOString().split('T')[0],
+    description: '',
     transactionType: 'CREDITO',
     amount: 0,
     accountId: ''
@@ -68,7 +73,23 @@ export class Movements implements OnInit {
 
   ngOnInit(): void {
     this.loadAccounts();
-    this.loadMovements();
+    if (this.accountIdFilter) {
+      this.selectedAccountId = this.accountIdFilter;
+      this.formData.accountId = this.accountIdFilter;
+      // Cargar la cuenta para mostrar el saldo
+      this.accountService.obtener(this.accountIdFilter).subscribe({
+        next: (account: Cuenta) => {
+          this.selectedAccount = account;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.cdr.markForCheck();
+        }
+      });
+      this.loadMovementsByAccount(this.accountIdFilter);
+    } else {
+      this.loadMovements();
+    }
   }
 
   loadAccounts(): void {
@@ -79,6 +100,19 @@ export class Movements implements OnInit {
       },
       error: (err: any) => {
         console.error('Error loading accounts:', err);
+      }
+    });
+  }
+
+  loadMovementsByAccount(accountId: string): void {
+    this.movementService.listarPorCuenta(accountId).subscribe({
+      next: (response: any) => {
+        this.movements$ = new Promise(resolve => resolve(response.content || response)) as any;
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        console.error('Error loading movements:', err);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -146,10 +180,19 @@ export class Movements implements OnInit {
     this.onSearch();
   }
 
+  getSelectedAccountName(): string {
+    if (!this.formData.accountId) {
+      return 'Seleccionar Cuenta';
+    }
+    const account = this.allAccounts.find(a => a.id === this.formData.accountId);
+    return account ? `${account.accountNumber} - ${account.accountType}` : 'Cuenta no encontrada';
+  }
+
   onNewMovement(): void {
     this.modalMode = 'create';
     this.formData = {
       date: new Date().toISOString().split('T')[0],
+      description: '',
       transactionType: 'CREDITO',
       amount: 0,
       accountId: this.selectedAccountId
@@ -173,6 +216,7 @@ export class Movements implements OnInit {
         this.showModal = false;
         this.formData = {
           date: new Date().toISOString().split('T')[0],
+          description: '',
           transactionType: 'CREDITO',
           amount: 0,
           accountId: ''
@@ -188,6 +232,14 @@ export class Movements implements OnInit {
 
   validateMovementForm(): string[] {
     const errors: string[] = [];
+
+    // Descripción: requerida, mín 3 caracteres, máx 200
+    if (!this.formData.description || this.formData.description.trim().length < 3) {
+      errors.push('La descripción debe tener al menos 3 caracteres');
+    }
+    if (this.formData.description && this.formData.description.length > 200) {
+      errors.push('La descripción no puede exceder 200 caracteres');
+    }
 
     // Tipo: requerido
     if (!this.formData.transactionType) {

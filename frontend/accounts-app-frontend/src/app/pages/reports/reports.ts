@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Report } from '../../services/report';
@@ -15,6 +15,9 @@ import { Cliente } from '../../services/models';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Reports implements OnInit {
+  @Input() clientIdFilter: string = '';
+  @Input() isModal: boolean = false;
+  
   clients: Cliente[] = [];
   filteredClients: Cliente[] = [];
   selectedClientId: string = '';
@@ -36,6 +39,9 @@ export class Reports implements OnInit {
 
   ngOnInit(): void {
     this.loadClients();
+    if (this.clientIdFilter) {
+      this.selectedClientId = this.clientIdFilter;
+    }
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     this.dateFrom = firstDay.toISOString().split('T')[0];
@@ -115,7 +121,6 @@ export class Reports implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        // El interceptor ya mostró la notificación de error
         this.cdr.markForCheck();
       }
     });
@@ -165,7 +170,6 @@ export class Reports implements OnInit {
         this.notificationService.success('Reporte PDF descargado');
       },
       error: () => {
-        // El interceptor ya mostró la notificación de error
       }
     });
   }

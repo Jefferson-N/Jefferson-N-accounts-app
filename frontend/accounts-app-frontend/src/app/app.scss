@@ -102,6 +102,25 @@ html, body {
     color: $color-text-white;
     border-left-color: #ffcc00;
   }
+
+  &--external {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #d0d0d0;
+    margin-top: 10px;
+    padding-top: 15px;
+    font-size: 14px;
+
+    i {
+      font-size: 16px;
+    }
+
+    &:hover {
+      background-color: #f0f0f0;
+      color: $color-primary-blue;
+    }
+  }
 }
 
 /* CONTENIDO PRINCIPAL */

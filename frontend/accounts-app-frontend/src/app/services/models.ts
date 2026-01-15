@@ -50,7 +50,7 @@ export interface Cuenta {
   accountNumber: string;
   accountType: 'AHORRO' | 'CORRIENTE';
   initialBalance: number;
-  balance?: number;
+  currentBalance?: number;
   status: boolean;
   customerId?: string;
   customer?: Cliente;
@@ -59,7 +59,6 @@ export interface Cuenta {
 }
 
 export interface AccountRequest {
-  accountNumber: string;
   accountType: 'AHORRO' | 'CORRIENTE';
   initialBalance: number;
   status: boolean;
@@ -67,7 +66,6 @@ export interface AccountRequest {
 }
 
 export interface AccountUpdateRequest {
-  accountNumber?: string;
   accountType?: 'AHORRO' | 'CORRIENTE';
   initialBalance?: number;
   status?: boolean;
@@ -76,6 +74,7 @@ export interface AccountUpdateRequest {
 export interface Movimiento {
   id?: string;
   date: string;
+  description: string;
   type: 'CREDITO' | 'DEBITO';
   amount: number;
   balance?: number;
@@ -87,6 +86,7 @@ export interface Movimiento {
 
 export interface TransactionRequest {
   date: string;
+  description: string;
   transactionType: 'CREDITO' | 'DEBITO';
   amount: number;
   accountId: string;
@@ -94,6 +94,7 @@ export interface TransactionRequest {
 
 export interface TransactionUpdateRequest {
   date?: string;
+  description?: string;
   type?: 'CREDITO' | 'DEBITO';
   amount?: number;
   balance?: number;

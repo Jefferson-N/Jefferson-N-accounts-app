@@ -2,7 +2,7 @@
   <div class="page-header">
     <h2 class="page-header__title">Movimientos</h2>
   </div>
-  <div class="toolbar">
+  <div class="toolbar" *ngIf="!isModal">
     <div class="toolbar__search">
       <div class="account-filter">
         <div class="account-filter__header" (click)="onAccountFilterToggle()">
@@ -49,11 +49,19 @@
       Nuevo
     </button>
   </div>
+
+  <!-- Botón para crear movimiento en modal -->
+  <div *ngIf="isModal" class="toolbar toolbar--modal">
+    <button class="btn btn--primary" (click)="onNewMovement()">
+      <i class="fas fa-plus"></i> Nuevo Movimiento
+    </button>
+  </div>
   <div class="table-container">
     <table class="data-table">
       <thead class="data-table__head">
         <tr class="data-table__head-row">
           <th class="data-table__header">Fecha</th>
+          <th class="data-table__header">Descripción</th>
           <th class="data-table__header">Tipo</th>
           <th class="data-table__header">Monto</th>
           <th class="data-table__header">Saldo</th>
@@ -62,6 +70,7 @@
       <tbody>
         <tr class="data-table__body-row" *ngFor="let movement of movements$ | async">
           <td class="data-table__cell">{{ movement.date | date:'dd/MM/yyyy' }}</td>
+          <td class="data-table__cell">{{ movement.description }}</td>
           <td class="data-table__cell">{{ movement.type }}</td>
           <td class="data-table__cell">{{ movement.amount | currency }}</td>
           <td class="data-table__cell">{{ movement.balance | currency }}</td>
@@ -72,7 +81,7 @@
   <div class="info-message">
     <p><i class="fas fa-info-circle"></i> Los movimientos no pueden ser editados o eliminados para mantener la integridad de los registros.</p>
   </div>
-  <div class="pagination">
+  <div class="pagination" *ngIf="!isModal">
     <button class="btn btn--secondary" (click)="onPreviousPage()" [disabled]="currentPage === 1">
       <i class="fas fa-minus"></i>
     </button>
@@ -88,6 +97,22 @@
         <h3>{{ modalMode === 'create' ? 'Nuevo Movimiento' : 'Editar Movimiento' }}</h3>
       </div>
       <div class="modal-body">
+        <!-- Información de saldo cuando es modal -->
+        <div *ngIf="isModal && selectedAccount" class="account-info">
+          <div class="account-info__item">
+            <label>Cuenta:</label>
+            <span class="account-info__value">{{ selectedAccount.accountNumber }} - {{ selectedAccount.accountType }}</span>
+          </div>
+          <div class="account-info__item">
+            <label>Saldo Actual:</label>
+            <span class="account-info__value account-info__balance">{{ selectedAccount.currentBalance | currency }}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción <span class="form-required">*</span></label>
+          <input type="text" [(ngModel)]="formData.description" placeholder="Ej: Retiro de 575" class="form-input" required minlength="3" maxlength="200" />
+          <small class="form-hint">Mínimo 3, máximo 200 caracteres</small>
+        </div>
         <div class="form-group">
           <label>Tipo de Movimiento <span class="form-required">*</span></label>
           <select [(ngModel)]="formData.transactionType" class="form-input" required>
@@ -103,7 +128,12 @@
         </div>
         <div class="form-group">
           <label>Cuenta <span class="form-required">*</span></label>
-          <select [(ngModel)]="formData.accountId" class="form-input" required>
+          <!-- Cuando es modal, mostrar solo lectura -->
+          <div *ngIf="isModal" class="form-input form-input--readonly">
+            {{ getSelectedAccountName() }}
+          </div>
+          <!-- Cuando es pantalla normal, mostrar select editable -->
+          <select *ngIf="!isModal" [(ngModel)]="formData.accountId" class="form-input" required>
             <option value="">Seleccionar Cuenta</option>
             <option *ngFor="let account of allAccounts" [value]="account.id!">
               {{ account.accountNumber }} - {{ account.accountType }}

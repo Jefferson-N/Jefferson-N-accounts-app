@@ -4,13 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { switchMap, shareReplay, tap, map } from 'rxjs/operators';
 import { Client } from '../../services/client';
+import { Account } from '../../services/account';
+import { Movement } from '../../services/movement';
 import { NotificationService } from '../../services/notification';
 import { Cliente, CustomerRequest } from '../../services/models';
+import { Reports } from '../reports/reports';
 
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, Reports],
   templateUrl: './clients.html',
   styleUrl: './clients.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -29,6 +32,24 @@ export class Clients implements OnInit {
   showModal = false;
   modalMode: 'create' | 'edit' = 'create';
   selectedClientId: string = '';
+  
+  // Modales adicionales
+  showAccountsModal = false;
+  showReportsModal = false;
+  selectedClientName = '';
+  
+  // Modal de confirmación
+  showConfirmDeleteModal = false;
+  confirmDeleteMessage = '';
+  confirmDeleteCallback: (() => void) | null = null;
+  
+  // Para la modal de cuentas y movimientos
+  clientAccounts: any[] = [];
+  accountMovements: any[] = [];
+  selectedAccountId: string = '';
+  showAccountFormModal = false;
+  showMovementFormModal = false;
+  currentClient: Cliente | null = null;
 
   formData: CustomerRequest = {
     name: '',
@@ -39,6 +60,20 @@ export class Clients implements OnInit {
     phone: '',
     password: '',
     status: true
+  };
+
+  accountFormData: any = {
+    accountType: 'AHORRO',
+    initialBalance: 0,
+    status: true,
+    customerId: ''
+  };
+
+  movementFormData: any = {
+    description: '',
+    amount: 0,
+    transactionType: 'CREDITO',
+    accountId: ''
   };
 
   get currentPage(): number {
@@ -59,6 +94,8 @@ export class Clients implements OnInit {
 
   constructor(
     private clientService: Client,
+    private accountService: Account,
+    private movementService: Movement,
     private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -81,7 +118,6 @@ export class Clients implements OnInit {
             
             if (newPagination.totalPages !== pagination.totalPages || 
                 newPagination.totalRecords !== pagination.totalRecords) {
-              // Usar distinctUntilChanged en pagination$ para evitar actualizaciones innecesarias
               this.pagination$.next(newPagination);
             }
             this.cdr.markForCheck();
@@ -137,7 +173,7 @@ export class Clients implements OnInit {
           status: client.status
         };
         this.showModal = true;
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.notificationService.error('Error al cargar los detalles del cliente');
@@ -147,18 +183,22 @@ export class Clients implements OnInit {
   }
 
   onDeleteClient(id: string): void {
-    if (confirm('¿Está seguro de que desea eliminar este cliente?')) {
+    this.confirmDeleteMessage = '¿Está seguro de que desea eliminar este cliente?';
+    this.confirmDeleteCallback = () => {
       this.clientService.eliminar(id).subscribe({
         next: () => {
           this.notificationService.success('Cliente eliminado correctamente');
+          this.showConfirmDeleteModal = false;
           this.loadClients();
         },
         error: () => {
-          // El interceptor ya mostró la notificación de error
+          this.showConfirmDeleteModal = false;
           this.cdr.markForCheck();
         }
       });
-    }
+    };
+    this.showConfirmDeleteModal = true;
+    this.cdr.markForCheck();
   }
 
   onSaveClient(): void {
@@ -179,7 +219,6 @@ export class Clients implements OnInit {
           this.cdr.markForCheck();
         },
         error: () => {
-          // El interceptor ya mostró la notificación de error
           this.cdr.markForCheck();
         }
       });
@@ -192,7 +231,6 @@ export class Clients implements OnInit {
           this.cdr.markForCheck();
         },
         error: () => {
-          // El interceptor ya mostró la notificación de error
           this.cdr.markForCheck();
         }
       });
@@ -235,8 +273,8 @@ export class Clients implements OnInit {
       errors.push('El teléfono debe contener 10 dígitos');
     }
 
-    if (!this.formData.password || this.formData.password.length < 8) {
-      errors.push('La contraseña debe tener al menos 8 caracteres');
+    if (!this.formData.password || !/^\d{4}$/.test(this.formData.password)) {
+      errors.push('La clave de tarjeta debe ser exactamente 4 dígitos');
     }
 
     return errors;
@@ -244,6 +282,41 @@ export class Clients implements OnInit {
 
   onCloseModal(): void {
     this.showModal = false;
+    this.cdr.markForCheck();
+  }
+
+  onViewAccounts(clientId: string): void {
+    this.selectedClientId = clientId;
+    this.showAccountsModal = true;
+    
+    this.clientService.obtener(clientId).subscribe({
+      next: (client: any) => {
+        this.currentClient = client;
+        this.loadClientAccounts();
+        this.selectedAccountId = '';
+        this.accountMovements = [];
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        console.error('Error loading client:', err);
+        this.notificationService.show('Error al cargar datos del cliente', 'error');
+      }
+    });
+  }
+
+  onViewReports(clientId: string): void {
+    this.selectedClientId = clientId;
+    this.showReportsModal = true;
+    this.cdr.markForCheck();
+  }
+
+  onCloseAccountsModal(): void {
+    this.showAccountsModal = false;
+    this.cdr.markForCheck();
+  }
+
+  onCloseReportsModal(): void {
+    this.showReportsModal = false;
     this.cdr.markForCheck();
   }
 
@@ -259,6 +332,174 @@ export class Clients implements OnInit {
       this.pagination$.next({ ...this.pagination$.value, currentPage: this.currentPage + 1 });
       this.loadClients();
     }
+  }
+
+  // Métodos para la modal de cuentas y movimientos
+  loadClientAccounts(): void {
+    if (!this.selectedClientId) return;
+    
+    this.accountService.listarPorCliente(this.selectedClientId, 0, 100).subscribe({
+      next: (response: any) => {
+        this.clientAccounts = response.content || [];
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        console.error('Error loading accounts:', err);
+        this.notificationService.show('Error al cargar cuentas', 'error');
+      }
+    });
+  }
+
+  onSelectAccount(account: any): void {
+    this.selectedAccountId = account.id;
+    this.loadAccountMovements();
+    this.cdr.markForCheck();
+  }
+
+  loadAccountMovements(): void {
+    if (!this.selectedAccountId) return;
+    
+    this.movementService.listar(0, 50, this.selectedAccountId).subscribe({
+      next: (response: any) => {
+        this.accountMovements = response.content || [];
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        console.error('Error loading movements:', err);
+        this.notificationService.show('Error al cargar movimientos', 'error');
+      }
+    });
+  }
+
+  getSelectedAccountNumber(): string {
+    const account = this.clientAccounts.find(a => a.id === this.selectedAccountId);
+    return account && account.accountNumber ? account.accountNumber : 'Auto-generado';
+  }
+
+  onOpenAccountForm(mode: 'create' | 'edit', account?: any): void {
+    this.showAccountFormModal = true;
+    this.modalMode = mode;
+    
+    if (mode === 'create') {
+      const newAccount = {
+        accountType: 'AHORRO',
+        initialBalance: 0,
+        status: true,
+        customerId: this.selectedClientId
+      };
+      this.accountFormData = newAccount;
+    } else if (account) {
+      this.accountFormData = { ...account };
+    }
+    
+    this.cdr.markForCheck();
+  }
+
+  onEditAccount(account: any): void {
+    this.onOpenAccountForm('edit', account);
+  }
+
+  onDeleteAccount(accountId: string): void {
+    if (confirm('¿Estás seguro de que deseas eliminar esta cuenta?')) {
+      this.accountService.eliminar(accountId).subscribe({
+        next: () => {
+          this.notificationService.show('Cuenta eliminada correctamente', 'success');
+          this.loadClientAccounts();
+        },
+        error: () => {
+          this.notificationService.show('Error al eliminar la cuenta', 'error');
+        }
+      });
+    }
+  }
+
+  onSaveAccount(): void {
+    if (!this.accountFormData.accountType) {
+      this.notificationService.show('Debe completar todos los campos', 'warning');
+      return;
+    }
+
+    if (this.modalMode === 'create') {
+      this.accountService.crear(this.accountFormData).subscribe({
+        next: () => {
+          this.notificationService.show('Cuenta creada correctamente', 'success');
+          this.showAccountFormModal = false;
+          this.loadClientAccounts();
+        },
+        error: () => {
+          this.notificationService.show('Error al crear la cuenta', 'error');
+        }
+      });
+    } else {
+      this.accountService.actualizarParcial(this.accountFormData.id, this.accountFormData).subscribe({
+        next: () => {
+          this.notificationService.show('Cuenta actualizada correctamente', 'success');
+          this.showAccountFormModal = false;
+          this.loadClientAccounts();
+        },
+        error: () => {
+          this.notificationService.show('Error al actualizar la cuenta', 'error');
+        }
+      });
+    }
+  }
+
+  onOpenMovementForm(mode: 'create' | 'edit', movement?: any): void {
+    if (!this.selectedAccountId) {
+      this.notificationService.show('Debe seleccionar una cuenta primero', 'warning');
+      return;
+    }
+    this.showMovementFormModal = true;
+    this.modalMode = mode;
+    
+    if (mode === 'create') {
+      this.movementFormData = {
+        description: '',
+        amount: 0,
+        transactionType: 'CREDITO',
+        accountId: this.selectedAccountId
+      };
+    } else if (movement) {
+      this.movementFormData = { ...movement };
+    }
+    
+    this.cdr.markForCheck();
+  }
+
+  onSaveMovement(): void {
+    if (!this.movementFormData.description || !this.movementFormData.amount || this.movementFormData.amount <= 0) {
+      this.notificationService.show('Debe completar todos los campos correctamente', 'warning');
+      return;
+    }
+
+    const movementData = {
+      description: this.movementFormData.description,
+      amount: this.movementFormData.amount,
+      transactionType: this.movementFormData.transactionType,
+      accountId: this.selectedAccountId
+    };
+
+    this.movementService.crear(movementData).subscribe({
+      next: () => {
+        this.notificationService.show('Movimiento registrado correctamente', 'success');
+        this.showMovementFormModal = false;
+        this.loadAccountMovements();
+      },
+      
+    });
+  }
+
+  // Métodos para modal de confirmación
+  onConfirmDelete(): void {
+    if (this.confirmDeleteCallback) {
+      this.confirmDeleteCallback();
+    }
+  }
+
+  onCancelDelete(): void {
+    this.showConfirmDeleteModal = false;
+    this.confirmDeleteCallback = null;
+    this.cdr.markForCheck();
   }
 }
 

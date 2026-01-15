@@ -111,3 +111,58 @@
   }
 }
 
+.toolbar--modal {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+.form-input--readonly {
+  background-color: #f5f5f5;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  cursor: not-allowed;
+}
+
+.account-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: #e8f4fd;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border-left: 4px solid #007bff;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0066cc;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  &__value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+
+    &.account-info__balance {
+      font-size: 16px;
+      font-weight: 700;
+      color: #007bff;
+    }
+  }
+}

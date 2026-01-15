@@ -45,11 +45,11 @@ export class Account {
   }
 
   listarPorCliente(clienteId: string, page: number = 0, size: number = 10): Observable<PaginatedResponse<Cuenta>> {
-    const params = new HttpParams()
-      .set('clienteId', clienteId)
-      .set('page', page.toString())
-      .set('size', size.toString());
-
-    return this.http.get<PaginatedResponse<Cuenta>>(`${this.apiUrl}/cliente`, { params });
+    return this.http.get<PaginatedResponse<Cuenta>>(`${this.apiUrl}`, {
+      params: new HttpParams()
+        .set('clienteId', clienteId)
+        .set('page', page.toString())
+        .set('size', size.toString())
+    });
   }
 }

@@ -155,8 +155,10 @@ accounts-app/
 │       ├── jest.config.js
 │       └── package.json
 ├── entregables/
+|   ├── Evidencia Caso.pdf # Documento de evidencias
 │   ├── BaseDatos.sql                     # Script de base de datos
-│   └── Accounts Backend API - Casos de Prueba V2.postman_collection.json.json           # Colección de Postman
+│   └── dev-tools/ Accounts Backend API - Casos de Prueba V2.postman_collection.json.json           # Colección de Postman
+│   └── reportes/..  # Reportes generados en las pruebas
 └── docker-compose.yml
 ```
 

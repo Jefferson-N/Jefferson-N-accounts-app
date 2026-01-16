@@ -204,7 +204,7 @@ accounts-app/
 
 ## 📮 Colección de Postman
 
-Importar el archivo `entregables/Accounts Backend API - Casos de Prueba V2.postman_collection.json.json` en Postman para probar todos los endpoints.
+Importar el archivo `entregables/dev-tools/Accounts Backend API - Casos de Prueba V2.postman_collection.json.json` en Postman para probar todos los endpoints.
 
 ## 🔧 Configuración
 

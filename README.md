@@ -72,13 +72,31 @@ La aplicación estará disponible en `http://localhost:4200`
 
 1. Crear archivo `.env` en la raíz del proyecto:
 ```env
-DATASOURCE_PASSWORD=root
-DATASOURCE_USERNAME=accounts_db
+BACKEND_IMAGE_TAG=0.0.1
+FRONTEND_IMAGE_TAG=0.0.1
+# Database Configuration
 DB_PORT=3306
-SERVER_PORT=8081
+DATASOURCE_URL=jdbc:mysql://mysql-db:3306/accounts_db
+DATASOURCE_USERNAME=root
+DATASOURCE_PASSWORD=root
+JPA_HIBERNATE_DDL_AUTO=none
+JPA_SHOW_SQL=false
+JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+
+# Application Configuration
+DAILY_WITHDRAWAL_LIMIT=1000
+MAX_DAILY_WITHDRAWAL_LIMIT=10000
+
+#FrontEnd Configuration
 FRONTEND_PORT=4200
-BASE_IMAGE_TAG=1.0.0
-FRONTEND_VERSION=latest
+
+
+# Server Configuration
+SERVER_PORT=8081
+LOG_LEVEL=INFO
+SPRING_APPLICATION_NAME=accounts-backend
+
 ```
 
 2. Levantar todos los servicios:
